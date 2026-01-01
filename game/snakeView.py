@@ -10,12 +10,14 @@ class SnakeView:
 
     def display(self, snake):
         for segment in snake.segments:
-            self.drawSegment(self.screen, segment[0], segment[1])
+            self.drawSegment(self.screen, snake, segment[0], segment[1])
 
-    def drawSegment(self, surface, x, y):
-        pygame.draw.rect(surface, self.COLOR_SNAKE, (
-            x * self.fieldSize,
-            y * self.fieldSize,
-            self.fieldSize,
-            self.fieldSize,
-        ))
+    def drawSegment(self, surface, snake, x, y):
+        life = snake.life
+        if life > 0:
+            pygame.draw.rect(surface, self.COLOR_SNAKE, (
+                x * self.fieldSize + (self.fieldSize * (1 - snake.life) // 2),
+                y * self.fieldSize + (self.fieldSize * (1 - snake.life) // 2),
+                self.fieldSize * snake.life,
+                self.fieldSize * snake.life,
+            ))

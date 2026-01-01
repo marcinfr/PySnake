@@ -12,24 +12,38 @@ class BoardView:
 
     def display(self, board):
         if (self.background is None):
-            width = len(board[0])
-            height = len(board)
+            width = len(board)
+            height = len(board[0])
             self.background = pygame.Surface((self.fieldSize * width, self.fieldSize * height))
-            for y, row in enumerate(board):
-                for x, value in enumerate(row):
+            for x, row in enumerate(board):
+                for y, value in enumerate(row):
                     self.drawField(self.background, x, y)
         self.screen.blit(self.background, (0, 0))
+
+    def displayFruits(self, fruits):
+        for x, inner in fruits.items():
+            for y, value in inner.items():
+                self.drawFruit(x, y)
 
     def drawField(self, surface, x, y):
         if x % 2 == y % 2:
             color = self.COLOR_LIGHT
-            dots_color = self.COLOR_DARK
         else:
             color = self.COLOR_DARK
-            dots_color = self.COLOR_LIGHT
         pygame.draw.rect(surface, color, (
             x * self.fieldSize,
             y * self.fieldSize,
             self.fieldSize,
             self.fieldSize,
         ))
+
+    def drawFruit(self, x, y):
+        pygame.draw.circle(
+            self.screen,
+            (255, 0, 0),
+            (
+                (self.fieldSize // 2) + (self.fieldSize * x),
+                (self.fieldSize // 2) + (self.fieldSize * y)
+            ),
+            self.fieldSize // 4
+        )
