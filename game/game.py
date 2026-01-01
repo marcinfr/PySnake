@@ -2,6 +2,7 @@ import pygame
 from game.boardView import BoardView
 from game.snakeView import SnakeView
 from game.snake import Snake
+from game.controllers.keyboard import Keyboard
 
 class Game:
     def __init__(self, screen, width, height):
@@ -10,16 +11,24 @@ class Game:
         screenWidth, screenHeight = self.screen.get_size()
         maxWidth = screenWidth
         maxHeight = screenHeight
+
+        print("Requested board size:", width, "x", height)
+        print("Screen size:", screenWidth, "x", screenHeight)
+
         self.fieldSize = min(maxWidth // width, maxHeight // height)
         surfaceWidth = self.fieldSize * width
         surfaceHeight = self.fieldSize * height
+
+        print("Game initialized with board size:", surfaceWidth, "x", surfaceHeight)
+
         self.gameSurface = pygame.Surface((surfaceWidth, surfaceHeight))
         self.boardView = BoardView(self.gameSurface, self.fieldSize)
         self.snakeView = SnakeView(self.gameSurface, self.fieldSize)
-        self.snake = Snake([(5, 5), (5, 6), (5, 7)])
+        self.snake = Snake(1, [(5, 5), (5, 6), (5, 7), (5, 8), (5, 9)])
+        self.keyboard = Keyboard(self.snake)
 
-    def update(self, events):
-        pass
+    def update(self):
+        self.snake.move(self.board)
 
     def display(self):
         self.boardView.display(self.board)

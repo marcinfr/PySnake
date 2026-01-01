@@ -23,8 +23,10 @@ class BoardView:
     def drawField(self, surface, x, y):
         if x % 2 == y % 2:
             color = self.COLOR_LIGHT
+            dots_color = self.COLOR_DARK
         else:
             color = self.COLOR_DARK
+            dots_color = self.COLOR_LIGHT
         pygame.draw.rect(surface, color, (
             x * self.fieldSize,
             y * self.fieldSize,

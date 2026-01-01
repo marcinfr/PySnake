@@ -9,8 +9,8 @@ class Main:
         pygame.init()
         pygame.display.set_caption("Snake")
         #self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-        self.screen = pygame.display.set_mode((1200, 800))
-        self.game = Game(self.screen, 50, 30)
+        self.screen = pygame.display.set_mode((1600, 1000))
+        self.game = Game(self.screen, 30, 30)
 
     def exit(self):
         pygame.quit()
@@ -18,10 +18,10 @@ class Main:
 
     def run(self):
         while True:
-            self.events.reset();
-            if self.events.QUIT:
+            Events.reset();
+            if Events.QUIT:
                 self.exit()
-            self.game.update(self.events)
+            self.game.update()
             self.game.display()
             pygame.display.flip()
 
