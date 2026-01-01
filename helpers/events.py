@@ -1,7 +1,7 @@
 import pygame
 
 class Events:
-    eventListeners = []
+    eventListeners = {}
     MOUSEBUTTONDOWN = False
     QUIT = False
     EVENTPOSITION = (0, 0)
@@ -35,19 +35,18 @@ class Events:
         return key in Events.PRESSEDKEYS
 
     @staticmethod
-    def addEventListener(eventName, callback):
-        Events.eventListeners.append((eventName, callback))
+    def addEventListener(eventName, onEvent, callback):
+        Events.eventListeners[eventName] = (onEvent, callback)
 
     @staticmethod
     def dispatchEvent(eventName):
-        print("Dispatching event: " + eventName)
-        for listenerEventName, callback in Events.eventListeners:
-            if listenerEventName == eventName:
-                callback()
+        eventsToDispatch = []
+        for event in Events.eventListeners.values():
+            if event[0] == eventName:
+                eventsToDispatch.append(event[1])
+        for event in eventsToDispatch:
+            event()
 
     @staticmethod
-    def removeEventListener(eventName, callback):
-        Events.eventListeners = [
-            (en, cb) for (en, cb) in Events.eventListeners
-            if en != eventName or cb != callback
-        ]
+    def removeEventListener(eventName):
+        Events.eventListeners.pop(eventName, None)

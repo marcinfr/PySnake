@@ -5,28 +5,40 @@ class Menu:
     def __init__(self, screen):
         self.screen = screen
         self.buttons = []
+        self.isActive = False
+
+    def activate(self):
         self.currentButton = 0
-        Events.addEventListener("key_down_" + str(pygame.K_UP), self.moveUp)
-        Events.addEventListener("key_down_" + str(pygame.K_DOWN), self.moveDown)
-        Events.addEventListener("key_down_" + str(pygame.K_RETURN), self.click)
+        self.isActive = True
+        Events.addEventListener("menu_down", "key_down_" + str(pygame.K_UP), self.moveUp)
+        Events.addEventListener("menu_up", "key_down_" + str(pygame.K_DOWN), self.moveDown)
+        Events.addEventListener("menu_click", "key_down_" + str(pygame.K_RETURN), self.click)
+
+    def deactivate(self):
+        self.currentButton = 0
+        self.isActive = False
+        Events.removeEventListener("menu_down")
+        Events.removeEventListener("menu_up")
+        Events.removeEventListener("menu_click")
 
     def moveUp(self):
         self.currentButton -= 1
         if self.currentButton < 0:
             self.currentButton = len(self.buttons) -1
-        print(self.currentButton)
-
+            
     def moveDown(self):
         self.currentButton += 1
         if self.currentButton == len(self.buttons):
             self.currentButton = 0
-        print(self.currentButton)
 
     def click(self):
         button = self.buttons[self.currentButton]
         button.click()
 
     def display(self):
+        if (not self.isActive):
+            self.activate()
+
         self.screen.fill((100, 100, 100))
         pygame.draw.rect(self.screen, "red", (
             0,
