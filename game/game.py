@@ -5,11 +5,13 @@ from game.snake import Snake
 from game.controllers.keyboard import Keyboard
 from random import randrange
 from collections import defaultdict
+from helpers.events import Events
 
 class Game:
     def __init__(self, screen):
         self.screen = screen
         self.isRunning = False
+        Events.addEventListener("key_down_" + str(pygame.K_ESCAPE), self.stop)
 
     def start(self, width, height):
         self.isRunning = True
@@ -42,7 +44,10 @@ class Game:
         elif self.snake.life > 0:
             self.snake.die(self)
         else:
-            self.isRunning = False
+            self.stop()
+
+    def stop(self):
+        self.isRunning = False
 
     def display(self):
         self.boardView.display(self.board)

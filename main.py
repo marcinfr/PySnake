@@ -10,7 +10,7 @@ class Main:
         pygame.init()
         pygame.display.set_caption("Snake")
         #self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-        self.screen = pygame.display.set_mode((1600, 1000))
+        self.screen = pygame.display.set_mode((1280, 800))
         self.game = Game(self.screen)
         self.menu = Menu(self.screen)
         self.menu.addButton("START", self.startGame)
@@ -22,7 +22,7 @@ class Main:
 
     def startGame(self):
         self.screen.fill((100, 100, 100))
-        self.game.start(16, 12)
+        self.game.start(32, 20)
 
     def run(self):
         while True:
