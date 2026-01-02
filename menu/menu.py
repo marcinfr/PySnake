@@ -2,20 +2,21 @@ import pygame
 from helpers.events import Events
 
 class Menu:
-    def __init__(self, screen):
+    def __init__(self, screen, main):
+        pygame.joystick.init()
         self.screen = screen
         self.buttons = []
+        self.main = main
         self.isActive = False
 
     def activate(self):
-        self.currentButton = 0
         self.isActive = True
         Events.addEventListener("menu_down", "key_down_" + str(pygame.K_UP), self.moveUp)
         Events.addEventListener("menu_up", "key_down_" + str(pygame.K_DOWN), self.moveDown)
         Events.addEventListener("menu_click", "key_down_" + str(pygame.K_RETURN), self.click)
+        self.openMenu('main')
 
     def deactivate(self):
-        self.currentButton = 0
         self.isActive = False
         Events.removeEventListener("menu_down")
         Events.removeEventListener("menu_up")
@@ -48,6 +49,7 @@ class Menu:
         ))
         x = 10
         y = 0
+
         for index, button in enumerate(self.buttons):
             if (index == self.currentButton):
                 button.isActive = True
@@ -55,6 +57,33 @@ class Menu:
                 button.isActive = False
             button.display(self.screen, x, y)
             y += 120
+
+        if (self.currentMenu == 'multiplayer'):
+            count = pygame.joystick.get_count()
+            #print("Wykryte kontrolery:", count)
+            Button("Wykryte kontrolery:" + str(count), False).display(self.screen, x, y)
+
+            for i in range(count):
+                js = pygame.joystick.Joystick(i)
+                js.init()
+                Button(js.get_name(), False).display(self.screen, x, y)
+                y += 120
+
+
+    def openMenu(self, menu):
+        self.currentMenu = menu
+        self.initButtons(menu)
+
+    def initButtons(self, menu):
+        self.currentButton = 0
+        self.buttons = []
+        if (menu == "main"):
+            self.addButton("SINGLE PLAYER", self.main.startGame)
+            self.addButton("MULTI PLAYER", [self.openMenu, 'multiplayer'])
+            self.addButton("EXIT", self.main.exit)
+        if (menu == "multiplayer"):
+            self.addButton("START", self.main.startGame2)
+            self.addButton("BACK", [self.openMenu, 'main'])
 
     def addButton(self, title, onClick = False):
         self.buttons.append(Button(title, onClick))
@@ -91,5 +120,8 @@ class Button:
 
     def click(self):
         if self.onclick:
-            self.onclick()
+            if callable(self.onclick):
+                self.onclick()
+            else:
+                self.onclick[0](self.onclick[1])
         

@@ -13,10 +13,7 @@ class Main:
         #self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.screen = pygame.display.set_mode((1280, 800))
         self.game = Game(self.screen)
-        self.menu = Menu(self.screen)
-        self.menu.addButton("1 PLAYER", self.startGame)
-        self.menu.addButton("2 PLAYERS", self.startGame2)
-        self.menu.addButton("EXIT", self.exit)
+        self.menu = Menu(self.screen, self)
         self.menu.activate()
 
     def exit(self):
