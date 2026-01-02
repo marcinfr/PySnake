@@ -58,19 +58,39 @@ class Menu:
             button.display(self.screen, x, y)
             y += 120
 
+
         if (self.currentMenu == 'multiplayer'):
-            count = pygame.joystick.get_count()
-            #print("Wykryte kontrolery:", count)
-            Button("Wykryte kontrolery:" + str(count), False).display(self.screen, x, y)
+            self.displayJoysticks(x, y)
 
-            for i in range(count):
-                js = pygame.joystick.Joystick(i)
+
+    def displayJoysticks(self, x, y):
+        count = pygame.joystick.get_count()
+        #print("Wykryte kontrolery:", count)
+        Button("Wykryte kontrolery:" + str(count), False).display(self.screen, x, y)
+
+        for i in range(count):
+            js = pygame.joystick.Joystick(i)
+            if js.get_id() not in self.players:
                 js.init()
-                Button(js.get_name(), False).display(self.screen, x, y)
-                y += 120
+                moved = False
+                pygame.event.pump()
+                # sprawdź przyciski
+                for b in range(js.get_numbuttons()):
+                    if js.get_button(b):
+                        moved = True
 
-
+                if moved:
+                    self.players[js.get_id()] = {
+                        'joystick': js
+                    }
+                    self.addButton(js.get_name(), False)
+                
+        Button('Press any button on pad to join', False).disable().display(self.screen, x, y)
+        
     def openMenu(self, menu):
+        if (menu == 'multiplayer'):
+            self.players = {}
+    
         self.currentMenu = menu
         self.initButtons(menu)
 
@@ -78,11 +98,11 @@ class Menu:
         self.currentButton = 0
         self.buttons = []
         if (menu == "main"):
-            self.addButton("SINGLE PLAYER", self.main.startGame)
+            self.addButton("SINGLE PLAYER", (self.main.startGame, {}))
             self.addButton("MULTI PLAYER", [self.openMenu, 'multiplayer'])
             self.addButton("EXIT", self.main.exit)
         if (menu == "multiplayer"):
-            self.addButton("START", self.main.startGame2)
+            self.addButton("START", (self.main.startGame, self.players))
             self.addButton("BACK", [self.openMenu, 'main'])
 
     def addButton(self, title, onClick = False):
@@ -93,13 +113,20 @@ class Button:
         self.title = title
         self.textColor = "white"
         self.isActive = False
+        self.isDisabled = False
         self.onclick = onClick
+
+    def disable(self):
+        self.isDisabled = True
+        return self
 
     def display(self, surface, x, y):
         width = 500
         height = 100
         button = pygame.Surface((width, height), pygame.SRCALPHA)
-        if self.isActive:
+        if self.isDisabled:
+            button.fill((100, 100, 100, 255))
+        elif self.isActive:
             button.fill((200, 0, 0, 255))
         else:
             button.fill((100, 0, 0, 255))

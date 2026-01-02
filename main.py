@@ -20,15 +20,16 @@ class Main:
         pygame.quit()
         sys.exit()
 
-    def startGame(self):
+    def startGame(self, players):
         self.menu.deactivate()
         self.screen.fill((100, 100, 100))
         self.game.start(32, 20)
-        self.game.addSnake((1,1), 3, Keyboard())
 
-    def startGame2(self):
-        self.startGame()
-        self.game.addSnake((10, 10), 3, False)
+        playersCounter = 1
+        self.game.addSnake((playersCounter * 3,1), 1, Keyboard())
+        for player in players.values():
+            self.game.addSnake((playersCounter * 3,playersCounter * 3), 3, Keyboard())
+            playersCounter += 1
 
     def run(self):
         while True:

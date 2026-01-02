@@ -22,6 +22,9 @@ class Events:
                 Events.dispatchEvent("key_down_" + str(event.key))
                 Events.KEYDOWN = True
                 Events.PRESSEDKEYS.append(event.key)
+            if event.type == pygame.JOYBUTTONDOWN:
+                js = pygame.joystick.Joystick(event.joy)
+                print(f"Pad {js.get_name()} przycisk {event.button} wciśnięty")
 
     @staticmethod
     def resetKeys():
