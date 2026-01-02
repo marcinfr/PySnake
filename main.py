@@ -3,15 +3,15 @@ import sys
 from helpers.events import Events
 from game.game import Game
 from menu.menu import Menu
-from game.controllers.keyboard import Keyboard
 
 class Main:
     def __init__(self):
         self.events = Events()
         pygame.init()
         pygame.display.set_caption("Snake")
-        #self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-        self.screen = pygame.display.set_mode((1280, 800))
+        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        #self.screen = pygame.display.set_mode((1280, 800))
+        #self.screen = pygame.display.set_mode((800, 600))
         self.game = Game(self.screen)
         self.menu = Menu(self.screen, self)
         self.menu.activate()
@@ -23,13 +23,7 @@ class Main:
     def startGame(self, players):
         self.menu.deactivate()
         self.screen.fill((100, 100, 100))
-        self.game.start(32, 20)
-
-        playersCounter = 1
-        self.game.addSnake((playersCounter * 3,1), 1, Keyboard())
-        for player in players.values():
-            self.game.addSnake((playersCounter * 3,playersCounter * 3), 3, Keyboard())
-            playersCounter += 1
+        self.game.start(32, 20, players)
 
     def run(self):
         while True:

@@ -6,8 +6,17 @@ class Pad:
         self.joystick = joystick
 
     def setSnake(self, snake):
-        pass
-        #Events.addEventListener("snake_up" + str(snake.id), "key_down_" + str(pygame.K_UP), snake.moveUp)
-        #Events.addEventListener("snake_down" + str(snake.id), "key_down_" + str(pygame.K_DOWN), snake.moveDown)
-        #Events.addEventListener("snake_left" + str(snake.id), "key_down_" + str(pygame.K_LEFT), snake.moveLeft)
-        #Events.addEventListener("snake_right" + str(snake.id), "key_down_" + str(pygame.K_RIGHT), snake.moveRight)
+        Events.addEventListener("snake_up" + str(snake.id), "joy_hat_motion", (self.moveSnake, snake))
+
+    def moveSnake(self, snake):
+        if self.joystick.get_id() in Events.JOYHATMOTIONS:
+            value = Events.JOYHATMOTIONS[self.joystick.get_id()]
+            print(value)
+            if value[0] == 1:
+                snake.moveRight()
+            if value[0] == -1:
+                snake.moveLeft()
+            if value[1] == 1:
+                snake.moveUp()
+            if value[1] == -1:
+                snake.moveDown()

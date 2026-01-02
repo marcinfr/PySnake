@@ -60,39 +60,37 @@ class Menu:
 
 
         if (self.currentMenu == 'multiplayer'):
-            self.displayJoysticks(x, y)
+            self.initJoysticks()
+            Button('Press any button on pad to join', False).disable().display(self.screen, x, y)
 
-
-    def displayJoysticks(self, x, y):
+    def initJoysticks(self):
         count = pygame.joystick.get_count()
         #print("Wykryte kontrolery:", count)
-        Button("Wykryte kontrolery:" + str(count), False).display(self.screen, x, y)
+        #Button("Wykryte kontrolery:" + str(count), False).display(self.screen, x, y)
 
         for i in range(count):
             js = pygame.joystick.Joystick(i)
-            if js.get_id() not in self.players:
-                js.init()
-                moved = False
-                pygame.event.pump()
-                # sprawdź przyciski
-                for b in range(js.get_numbuttons()):
-                    if js.get_button(b):
-                        moved = True
-
-                if moved:
-                    self.players[js.get_id()] = {
-                        'joystick': js
-                    }
-                    self.addButton(js.get_name(), False)
-                
-        Button('Press any button on pad to join', False).disable().display(self.screen, x, y)
+            js.init()
         
     def openMenu(self, menu):
         if (menu == 'multiplayer'):
             self.players = {}
+            Events.addEventListener("menu_multiplayer_joy_button_down", "joy_button_down", self.addPlayer)
+        else:
+            Events.removeEventListener("menu_multiplayer_joy_button_down")
     
         self.currentMenu = menu
         self.initButtons(menu)
+
+    def addPlayer(self):
+        print(Events.JOYBUTTONDOWNS)
+        for joy_id in Events.JOYBUTTONDOWNS:
+            if joy_id not in self.players:
+                js = pygame.joystick.Joystick(joy_id)
+                self.players[joy_id] = {
+                        'joystick': js
+                    }
+                self.addButton(js.get_name(), False)
 
     def initButtons(self, menu):
         self.currentButton = 0

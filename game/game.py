@@ -3,6 +3,7 @@ from game.boardView import BoardView
 from game.snakeView import SnakeView
 from game.snake import Snake
 from game.controllers.keyboard import Keyboard
+from game.controllers.pad import Pad
 from random import randrange
 from collections import defaultdict
 from helpers.events import Events
@@ -13,7 +14,10 @@ class Game:
         self.isRunning = False
         Events.addEventListener("game-esc", "key_down_" + str(pygame.K_ESCAPE), self.stop)
 
-    def start(self, width, height):
+    def start(self, width, height, players = None):
+        self.players = players
+        self.width = width
+        self.height = height
         self.snakes = []
         self.isRunning = True
         self.board = [[0 for _ in range(height)] for _ in range(width)]
@@ -21,6 +25,13 @@ class Game:
         screenWidth, screenHeight = self.screen.get_size()
         maxWidth = screenWidth
         maxHeight = screenHeight
+
+        playersCounter = 1
+        self.addSnake((playersCounter * 3, 1), 3, Keyboard())
+        for player in self.players.values():
+            joystick = player['joystick']
+            self.addSnake((playersCounter * 3,playersCounter * 3), 3, Pad(joystick))
+            playersCounter += 1
 
         print("Requested board size:", width, "x", height)
         print("Screen size:", screenWidth, "x", screenHeight)
@@ -57,7 +68,8 @@ class Game:
                 snake.die(self)
 
         if not isAliveSnake:
-            self.stop()
+            self.start(self.width, self.height, self.players)
+            #self.stop()
 
     def stop(self):
         self.isRunning = False

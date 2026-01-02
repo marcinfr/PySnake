@@ -7,6 +7,8 @@ class Events:
     EVENTPOSITION = (0, 0)
     KEYDOWN = False
     PRESSEDKEYS = []
+    JOYHATMOTIONS = {}
+    JOYBUTTONDOWNS = {}
 
     @staticmethod
     def reset():
@@ -19,12 +21,18 @@ class Events:
                 Events.MOUSEBUTTONDOWN = True
                 Events.EVENTPOSITION = event.pos
             if event.type == pygame.KEYDOWN:
-                Events.dispatchEvent("key_down_" + str(event.key))
                 Events.KEYDOWN = True
                 Events.PRESSEDKEYS.append(event.key)
+                Events.dispatchEvent("key_down_" + str(event.key))
             if event.type == pygame.JOYBUTTONDOWN:
                 js = pygame.joystick.Joystick(event.joy)
-                print(f"Pad {js.get_name()} przycisk {event.button} wciśnięty")
+                Events.JOYBUTTONDOWNS[js.get_id()] = event.button
+                Events.dispatchEvent("joy_button_down")
+            if event.type == pygame.JOYHATMOTION:
+                js = pygame.joystick.Joystick(event.joy)
+                Events.JOYHATMOTIONS[js.get_id()] = event.value
+                Events.dispatchEvent('joy_hat_motion')
+                Events.dispatchEvent('joy_hat_motion_' + str(js.get_id()))
 
     @staticmethod
     def resetKeys():
@@ -32,6 +40,8 @@ class Events:
         Events.QUIT = False
         Events.KEYDOWN = False
         Events.PRESSEDKEYS = []
+        Events.JOYHATMOTIONS = {}
+        Events.JOYBUTTONDOWNS = {}
 
     @staticmethod
     def isKeyPressed(key):
@@ -48,7 +58,10 @@ class Events:
             if event[0] == eventName:
                 eventsToDispatch.append(event[1])
         for event in eventsToDispatch:
-            event()
+            if callable(event):
+                event()
+            else:
+                event[0](event[1])
 
     @staticmethod
     def removeEventListener(eventName):
