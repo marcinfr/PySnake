@@ -11,7 +11,6 @@ class Pad:
     def moveSnake(self, snake):
         if self.joystick.get_id() in Events.JOYHATMOTIONS:
             value = Events.JOYHATMOTIONS[self.joystick.get_id()]
-            print(value)
             if value[0] == 1:
                 snake.moveRight()
             if value[0] == -1:

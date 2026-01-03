@@ -3,18 +3,24 @@ from helpers.timer import Timer
 class Snake:
 
     COLORS = [
-        "red",
-        "black",
-        "green",
-        "yellow"
+        (138, 43, 226),  # fioletowy (Blue Violet)
+        (220, 20, 60),    # czerwony (Crimson)
+        (30, 144, 255),  # niebieski (Dodger Blue)
+        (255, 215, 0),  # żółty / złoty (Gold)
+        (255, 140, 0),   # pomarańczowy (Dark Orange)
+        (0, 206, 209),   # turkusowy (Dark Turquoise)
     ]
 
-    def __init__(self, id, segements):
+    def __init__(self, id, segements, color):
         self.id = id
         self.segments = segements
-        self.direction = (1, 0)
         self.life = 1
         self.speed = 0.1  # seconds per move
+        self.color = self.COLORS[color]
+        self.setDirection((1,0))
+
+    def setDirection(self, dir):
+        self.direction = dir
         self.nextDirection = self.direction
 
     def move(self, game):

@@ -7,6 +7,8 @@ from game.controllers.pad import Pad
 from random import randrange
 from collections import defaultdict
 from helpers.events import Events
+from helpers.timer import Timer
+import math
 
 class Game:
     def __init__(self, screen):
@@ -15,6 +17,8 @@ class Game:
         Events.addEventListener("game-esc", "key_down_" + str(pygame.K_ESCAPE), self.pause)
 
     def start(self, width, height, players = None):
+        self.pointsBarHeight = 80
+        self.counterToStart = 3
         self.players = players
         self.width = width
         self.height = height
@@ -25,20 +29,37 @@ class Game:
         self.fruits = defaultdict(dict)
         screenWidth, screenHeight = self.screen.get_size()
         maxWidth = screenWidth
-        maxHeight = screenHeight
+        maxHeight = screenHeight - self.pointsBarHeight
 
-        playersCounter = 1
-        self.addSnake((playersCounter * 3, 1), 3, Keyboard())
+        initPositions = [
+            (3,3, (1,0)),
+            (width-3,height-3, (-1,0)),
+            (width-3,3, (0,1)),
+            (3,height-3, (0,-1)),
+        ]
+
+        playersCounter = 0
+
+        if not self.players:
+            self.players['main'] = {
+                'type': 'main',
+                'color': 0
+            }
+
         for player in self.players.values():
+            if player['type'] == 'main':
+                controller = Keyboard()
             if player['type'] == 'joystick':
-                joystick = player['joystick']
-                self.addSnake((playersCounter * 3,playersCounter * 3), 3, Pad(joystick))
-                playersCounter += 1
+                controller = Pad(player['joystick'])
+            self.addSnake(initPositions[playersCounter], 3, controller, player['color'])
+            playersCounter += 1
 
         print("Requested board size:", width, "x", height)
         print("Screen size:", screenWidth, "x", screenHeight)
 
         self.fieldSize = min(maxWidth // width, maxHeight // height)
+
+        print( self.fieldSize)
         surfaceWidth = self.fieldSize * width
         surfaceHeight = self.fieldSize * height
 
@@ -52,26 +73,36 @@ class Game:
         #self.keyboard.setSnake(self.snake)
         self.addRandomFruit()
     
-    def addSnake(self, headPosition, length, controller):
-        segments = [(headPosition[0], headPosition[1] + i) for i in range(length)]
-        snake = Snake(len(self.snakes), segments)
+    def addSnake(self, position, length, controller, color):
+        if (len(position) > 2):
+            direction = position[2]
+        else:
+            direction = (1,0)
+
+        segments = [(position[0] - (i * direction[0]), position[1] - (i * direction[1])) for i in range(length)]
+        print(segments)
+        snake = Snake(len(self.snakes), segments, color)
+        snake.setDirection(direction)
         if controller:
             controller.setSnake(snake)
         self.snakes.append(snake)
 
     def update(self):
         isAliveSnake = False
-        for snake in self.snakes:
-            if snake.life > 0:
-                isAliveSnake = True
-            if snake.life == 1:
-                snake.move(self)
-            elif snake.life > 0:
-                snake.die(self)
-
-        if not isAliveSnake:
-            #self.start(self.width, self.height, self.players)
-            self.stop()
+        if self.counterToStart > 0:
+            if Timer().has_elapsed("game-start-counter", 0.1):
+                self.counterToStart -= 0.1
+        else:
+            for snake in self.snakes:
+                if snake.life > 0:
+                    isAliveSnake = True
+                if snake.life == 1:
+                    snake.move(self)
+                elif snake.life > 0:
+                    snake.die(self)
+            if not isAliveSnake:
+                #self.start(self.width, self.height, self.players)
+                self.stop()
 
     def stop(self):
         self.isRunning = False
@@ -90,7 +121,24 @@ class Game:
         for snake in self.snakes:
             self.snakeView.display(snake)
         posX = (self.screen.get_width() - self.gameSurface.get_width()) // 2
-        self.screen.blit(self.gameSurface, (posX, 0))
+        self.displayCounter()    
+
+        self.screen.blit(self.gameSurface, (posX, self.pointsBarHeight))
+
+    def displayCounter(self):
+        if (self.counterToStart <= 0):
+            return
+        font = pygame.font.Font(None, 300)
+        text = font.render(str(math.ceil(self.counterToStart)), True, "White")
+        target_height = self.screen.get_height() * (self.counterToStart % 1)
+        scale = target_height / text.get_height()
+        new_width = int(text.get_width() * scale)
+        text = pygame.transform.scale(text, (new_width, target_height))
+        textRect = text.get_rect()
+        centerX = self.gameSurface.get_width() / 2
+        centerY = self.gameSurface.get_height() / 2
+        textRect.center = (centerX, centerY)
+        self.gameSurface.blit(text, textRect)
 
     def addRandomFruit(self):
         x = randrange(0, len(self.board))

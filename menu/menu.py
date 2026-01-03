@@ -96,6 +96,7 @@ class Menu:
                         'color': 0
                     }
                 )
+                Events.addEventListener('joy_player_next_color_event' + str(joy_id), 'joy_hat_motion_' + str(joy_id), [self.changeJoyPlayerColor, joy_id]);
 
     def addMainPlayer(self):
         self.addPlayer('main', { 'type': 'main', 'color': 0})
@@ -106,7 +107,16 @@ class Menu:
         self.players[id] = playerData
         self.addPlayerButton('Player ' + str(len(self.players)), id, False)
 
+    def changeJoyPlayerColor(self, joy_id):
+        value = Events.JOYHATMOTIONS[joy_id]
+        if value[0] == 1:
+            self.nextPlayerColor(joy_id)
+        if value[0] == -1:
+            self.prevPlayerColor(joy_id)
+
     def nextPlayerColor(self, playerId):
+        if self.currentMenu != 'multiplayer':
+            return
         currentColor = self.players[playerId]['color']
         currentColor += 1
         if currentColor == len(Snake.COLORS):
@@ -114,6 +124,8 @@ class Menu:
         self.players[playerId]['color'] = currentColor
 
     def prevPlayerColor(self, playerId):
+        if self.currentMenu != 'multiplayer':
+            return
         currentColor = self.players[playerId]['color']
         currentColor -= 1
         if currentColor < 0:
