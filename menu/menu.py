@@ -1,5 +1,7 @@
 import pygame
 from helpers.events import Events
+import math
+from game.snake import Snake
 
 class Menu:
     def __init__(self, screen, main):
@@ -8,13 +10,16 @@ class Menu:
         self.buttons = []
         self.main = main
         self.isActive = False
+        self.background = None
+        self.currentMenu = 'main'
+        self.players = {}
 
     def activate(self):
         self.isActive = True
         Events.addEventListener("menu_down", "key_down_" + str(pygame.K_UP), self.moveUp)
         Events.addEventListener("menu_up", "key_down_" + str(pygame.K_DOWN), self.moveDown)
         Events.addEventListener("menu_click", "key_down_" + str(pygame.K_RETURN), self.click)
-        self.openMenu('main')
+        self.openMenu()
 
     def deactivate(self):
         self.isActive = False
@@ -40,15 +45,11 @@ class Menu:
         if (not self.isActive):
             self.activate()
 
-        self.screen.fill((100, 100, 100))
-        pygame.draw.rect(self.screen, "red", (
-            0,
-            0,
-            20,
-            20,
-        ))
-        x = 10
-        y = 0
+        self.screen.fill((0, 0, 0))
+        self.displayBackground()
+
+        x = self.screen.get_width() // 2 - 300
+        y = self.screen.get_height() * 20 / 100
 
         for index, button in enumerate(self.buttons):
             if (index == self.currentButton):
@@ -72,44 +73,126 @@ class Menu:
             js = pygame.joystick.Joystick(i)
             js.init()
         
-    def openMenu(self, menu):
-        if (menu == 'multiplayer'):
+    def openMenu(self, menu = None):
+        if (menu == 'main'):
             self.players = {}
-            Events.addEventListener("menu_multiplayer_joy_button_down", "joy_button_down", self.addPlayer)
+        if (menu == 'multiplayer'):
+            Events.addEventListener("menu_multiplayer_joy_button_down", "joy_button_down", self.addJoystickPlayer)
         else:
             Events.removeEventListener("menu_multiplayer_joy_button_down")
     
-        self.currentMenu = menu
-        self.initButtons(menu)
+        if menu is not None:
+            self.currentMenu = menu
+        self.initButtons()
 
-    def addPlayer(self):
-        print(Events.JOYBUTTONDOWNS)
+    def addJoystickPlayer(self):
         for joy_id in Events.JOYBUTTONDOWNS:
             if joy_id not in self.players:
                 js = pygame.joystick.Joystick(joy_id)
-                self.players[joy_id] = {
-                        'joystick': js
+                self.addPlayer(joy_id, 
+                    {
+                        'type': 'joystick',
+                        'joystick': js,
+                        'color': 0
                     }
-                self.addButton(js.get_name(), False)
+                )
 
-    def initButtons(self, menu):
+    def addMainPlayer(self):
+        self.addPlayer('main', { 'type': 'main', 'color': 0})
+        Events.addEventListener('main_player_next_color_event', "key_down_" + str(pygame.K_RIGHT), [self.nextPlayerColor, 'main']);
+        Events.addEventListener('main_player_prev_color_event', "key_down_" + str(pygame.K_LEFT), [self.prevPlayerColor, 'main']);
+
+    def addPlayer(self, id, playerData):
+        self.players[id] = playerData
+        self.addPlayerButton('Player ' + str(len(self.players)), id, False)
+
+    def nextPlayerColor(self, playerId):
+        currentColor = self.players[playerId]['color']
+        currentColor += 1
+        if currentColor == len(Snake.COLORS):
+            currentColor = 0
+        self.players[playerId]['color'] = currentColor
+
+    def prevPlayerColor(self, playerId):
+        currentColor = self.players[playerId]['color']
+        currentColor -= 1
+        if currentColor < 0:
+            currentColor = len(Snake.COLORS) - 1
+        self.players[playerId]['color'] = currentColor
+
+    def initButtons(self):
         self.currentButton = 0
         self.buttons = []
-        if (menu == "main"):
+        if (self.currentMenu == "main"):
             self.addButton("SINGLE PLAYER", (self.main.startGame, {}))
             self.addButton("MULTI PLAYER", [self.openMenu, 'multiplayer'])
             self.addButton("EXIT", self.main.exit)
-        if (menu == "multiplayer"):
+        if (self.currentMenu == "multiplayer"):
             self.addButton("START", (self.main.startGame, self.players))
             self.addButton("BACK", [self.openMenu, 'main'])
+            self.addMainPlayer()
+        if (self.currentMenu == "game"):
+            if (not self.main.game.isEndGame):
+                self.addButton("RESUME", self.unPause)
+            self.addButton("PLAY AGAIN", (self.main.startGame, self.players))
+            self.addButton("EXIT", [self.openMenu, 'main'])
+
+    def unPause(self):
+        self.deactivate()
+        self.main.game.unPause()
 
     def addButton(self, title, onClick = False):
         self.buttons.append(Button(title, onClick))
+
+    def addPlayerButton(self, title, playerId, onClick = False):
+        self.buttons.append(PlayerButton(title, onClick).setPlayerId(playerId).setPlayers(self.players))
+
+    def displayBackground(self):
+        if self.background:
+            self.screen.blit(self.background, (0, 0))
+
+        cols = 30
+        self.background = pygame.Surface(self.screen.get_size())
+        size = math.ceil(self.screen.get_width() / cols)
+        rows = math.ceil(self.screen.get_height() / size)
+
+        for x in range(cols):
+            for y in range(rows):
+                d = 1
+                if (x + 1) * size < self.screen.get_width() / 2 - 500:
+                    d = 0.6
+                if x * size > self.screen.get_width() / 2 + 500:
+                    d = 0.6
+                    
+                if x % 2 == y % 2:
+                    color = (170 * d, 215 * d, 81 * d)
+                else:
+                    color = (162 * d, 209 * d, 73 * d)
+                pygame.draw.rect(self.background, color, (
+                    x * size,
+                    y * size,
+                    size,
+                    size,
+                ))
+        font = pygame.font.Font(None, 300)
+        text = font.render("SNAKE", True, "White")
+
+        target_height = self.screen.get_height() * 15 / 100 
+        scale = target_height / text.get_height()
+        new_width = int(text.get_width() * scale)
+        text = pygame.transform.scale(text, (new_width, target_height))
+
+        textRect = text.get_rect()
+        centerX = self.background.get_width() / 2
+        centerY = self.background.get_height() * 20 / 100 - (textRect.height / 2)
+        textRect.center = (centerX, centerY)
+        self.background.blit(text, textRect)
 
 class Button:
     def __init__(self, title, onClick = False):
         self.title = title
         self.textColor = "white"
+        self.textColorActive = "black"
         self.isActive = False
         self.isDisabled = False
         self.onclick = onClick
@@ -119,29 +202,31 @@ class Button:
         return self
 
     def display(self, surface, x, y):
-        width = 500
+        button = self.getButton()
+        surface.blit(button, (x, y))
+
+    def getButton(self):
+        width = 600
         height = 100
         button = pygame.Surface((width, height), pygame.SRCALPHA)
         if self.isDisabled:
-            button.fill((100, 100, 100, 255))
+            #button.fill((100, 100, 100, 255))
+            color = self.textColor
+            pass
         elif self.isActive:
-            button.fill((200, 0, 0, 255))
+            button.fill((255, 255, 255, 255))
+            color = self.textColorActive
         else:
-            button.fill((100, 0, 0, 255))
-        font = pygame.font.Font(None, 25) 
-        text = font.render(self.title, True, self.textColor)
-        #pygame.draw.rect(button, "blue", (
-        #    0,
-        #    0,
-        #    width,
-        #    height,
-        #))
+            button.fill((255, 255, 255, 100))
+            color = self.textColor
+        font = pygame.font.Font(None, 50) 
+        text = font.render(self.title, True, color)
         textRect = text.get_rect()
         centerX = width / 2
         centerY = height / 2
         textRect.center = (centerX, centerY)
         button.blit(text, textRect)
-        surface.blit(button, (x, y))
+        return button
 
     def click(self):
         if self.onclick:
@@ -150,3 +235,27 @@ class Button:
             else:
                 self.onclick[0](self.onclick[1])
         
+class PlayerButton(Button):
+
+    def setPlayerId(self, id):
+        self.playerId = id
+        return self
+    
+    def setPlayers(self, players):
+        self.players = players
+        return self
+
+    def getButton(self):
+        color = Snake.COLORS[self.players[self.playerId]['color']];
+
+        button = super().getButton()
+        size = button.get_height() - 20
+        pygame.draw.rect(button, color, (
+            10,
+            10,
+            size,
+            size
+        ))
+        #button.blit(colorBox, (10, 10))
+        return button
+    

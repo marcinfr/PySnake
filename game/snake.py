@@ -1,6 +1,14 @@
 from helpers.timer import Timer
 
 class Snake:
+
+    COLORS = [
+        "red",
+        "black",
+        "green",
+        "yellow"
+    ]
+
     def __init__(self, id, segements):
         self.id = id
         self.segments = segements

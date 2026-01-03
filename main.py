@@ -9,9 +9,9 @@ class Main:
         self.events = Events()
         pygame.init()
         pygame.display.set_caption("Snake")
-        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        #self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         #self.screen = pygame.display.set_mode((1280, 800))
-        #self.screen = pygame.display.set_mode((800, 600))
+        self.screen = pygame.display.set_mode((800, 600))
         self.game = Game(self.screen)
         self.menu = Menu(self.screen, self)
         self.menu.activate()
@@ -22,6 +22,7 @@ class Main:
 
     def startGame(self, players):
         self.menu.deactivate()
+        self.menu.currentMenu = 'game'
         self.screen.fill((100, 100, 100))
         self.game.start(32, 20, players)
 

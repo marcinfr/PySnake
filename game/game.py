@@ -12,7 +12,7 @@ class Game:
     def __init__(self, screen):
         self.screen = screen
         self.isRunning = False
-        Events.addEventListener("game-esc", "key_down_" + str(pygame.K_ESCAPE), self.stop)
+        Events.addEventListener("game-esc", "key_down_" + str(pygame.K_ESCAPE), self.pause)
 
     def start(self, width, height, players = None):
         self.players = players
@@ -20,6 +20,7 @@ class Game:
         self.height = height
         self.snakes = []
         self.isRunning = True
+        self.isEndGame = False
         self.board = [[0 for _ in range(height)] for _ in range(width)]
         self.fruits = defaultdict(dict)
         screenWidth, screenHeight = self.screen.get_size()
@@ -29,9 +30,10 @@ class Game:
         playersCounter = 1
         self.addSnake((playersCounter * 3, 1), 3, Keyboard())
         for player in self.players.values():
-            joystick = player['joystick']
-            self.addSnake((playersCounter * 3,playersCounter * 3), 3, Pad(joystick))
-            playersCounter += 1
+            if player['type'] == 'joystick':
+                joystick = player['joystick']
+                self.addSnake((playersCounter * 3,playersCounter * 3), 3, Pad(joystick))
+                playersCounter += 1
 
         print("Requested board size:", width, "x", height)
         print("Screen size:", screenWidth, "x", screenHeight)
@@ -68,13 +70,21 @@ class Game:
                 snake.die(self)
 
         if not isAliveSnake:
-            self.start(self.width, self.height, self.players)
-            #self.stop()
+            #self.start(self.width, self.height, self.players)
+            self.stop()
 
     def stop(self):
         self.isRunning = False
+        self.isEndGame = True
+
+    def pause(self):
+        self.isRunning = False
+
+    def unPause(self):
+        self.isRunning = True
 
     def display(self):
+        self.screen.fill((0, 0, 0))
         self.boardView.display(self.board)
         self.boardView.displayFruits(self.fruits)
         for snake in self.snakes:
