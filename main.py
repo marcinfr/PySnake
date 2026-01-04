@@ -8,9 +8,10 @@ class Main:
     def __init__(self):
         self.events = Events()
         pygame.init()
+        pygame.mixer.init()
         pygame.display.set_caption("Snake")
-        #self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-        self.screen = pygame.display.set_mode((1280, 800))
+        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        #self.screen = pygame.display.set_mode((1280, 800))
         #self.screen = pygame.display.set_mode((800, 600))
         self.game = Game(self.screen)
         self.menu = Menu(self.screen, self)

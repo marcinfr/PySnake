@@ -1,4 +1,5 @@
 from helpers.timer import Timer
+import pygame
 
 class Snake:
 
@@ -49,12 +50,18 @@ class Snake:
         fruits = game.fruits
         if new_head_x in fruits and new_head_y in fruits[new_head_x]:
             grow = True;
+
+            sound = pygame.mixer.Sound("assets/pick1.wav")
+            sound.play()
+
             game.removeFruit(new_head_x, new_head_y)
 
         new_head = (new_head_x, new_head_y)
 
         if game.board[new_head_x][new_head_y] > 0:
             self.life -= 0.1
+            sound = pygame.mixer.Sound("assets/dead1.wav")
+            sound.play()
             return
 
         game.board[new_head_x][new_head_y] = 1;

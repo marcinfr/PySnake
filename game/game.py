@@ -72,6 +72,12 @@ class Game:
         #self.keyboard = Keyboard()
         #self.keyboard.setSnake(self.snake)
         self.addRandomFruit()
+
+    def isLevelEnd():
+        pass
+
+    def nextLevel():
+        pass
     
     def addSnake(self, position, length, controller, color):
         if (len(position) > 2):
@@ -91,6 +97,9 @@ class Game:
         isAliveSnake = False
         if self.counterToStart > 0:
             if Timer().has_elapsed("game-start-counter", 0.1):
+                if math.ceil(self.counterToStart) - self.counterToStart < 0.1:
+                    sound = pygame.mixer.Sound("assets/counter1.wav")
+                    sound.play()
                 self.counterToStart -= 0.1
         else:
             for snake in self.snakes:
