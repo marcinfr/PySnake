@@ -25,8 +25,7 @@ class Main:
         self.menu.deactivate()
         self.menu.currentMenu = 'game'
         self.screen.fill((100, 100, 100))
-        self.game.start(32, 18, players)
-        #self.game.start(16, 9, players)
+        self.game.start(players)
 
     def run(self):
         while True:

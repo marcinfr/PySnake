@@ -1,11 +1,11 @@
 import pygame
 
-class BoardView:
+class ClassicBoardView:
 
     COLOR_LIGHT = (170, 215, 81)
     COLOR_DARK = (162, 209, 73)
 
-    def __init__(self, screen, fieldSize):
+    def init(self, screen, fieldSize):
         self.screen = screen
         self.fieldSize = fieldSize
         self.background = None
@@ -18,6 +18,8 @@ class BoardView:
             for x, row in enumerate(board):
                 for y, value in enumerate(row):
                     self.drawField(self.background, x, y)
+                    if (value == 2):
+                        self.drawWall(self.background, x, y)
         self.screen.blit(self.background, (0, 0))
 
     def displayFruits(self, fruits):
@@ -35,6 +37,28 @@ class BoardView:
             y * self.fieldSize,
             self.fieldSize,
             self.fieldSize,
+        ))
+
+    def drawWall(self, surface, x, y):
+        pygame.draw.polygon(surface, "white", 
+            [
+                (x * self.fieldSize, y * self.fieldSize),
+                (x * self.fieldSize + self.fieldSize, y * self.fieldSize),
+                (x * self.fieldSize, y * self.fieldSize + self.fieldSize),
+            ]
+        )
+        pygame.draw.polygon(surface, "black", 
+            [
+                (x * self.fieldSize + self.fieldSize, y * self.fieldSize + self.fieldSize),
+                (x * self.fieldSize + self.fieldSize, y * self.fieldSize),
+                (x * self.fieldSize, y * self.fieldSize + self.fieldSize),
+            ]
+        )
+        pygame.draw.rect(surface, (150,150,150), (
+            x * self.fieldSize + self.fieldSize * 0.2,
+            y * self.fieldSize + self.fieldSize * 0.2,
+            self.fieldSize - self.fieldSize * 0.2 * 2,
+            self.fieldSize - self.fieldSize * 0.2 * 2,
         ))
 
     def drawFruit(self, x, y):

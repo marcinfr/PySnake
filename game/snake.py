@@ -1,5 +1,4 @@
 from helpers.timer import Timer
-import pygame
 
 class Snake:
 
@@ -16,9 +15,10 @@ class Snake:
         self.id = id
         self.segments = segements
         self.life = 1
-        self.speed = 0.1  # seconds per move
+        self.speed = 0.12  # seconds per move
         self.color = self.COLORS[color]
         self.setDirection((1,0))
+        self.totalPoints = 0
 
     def setDirection(self, dir):
         self.direction = dir
@@ -50,18 +50,14 @@ class Snake:
         fruits = game.fruits
         if new_head_x in fruits and new_head_y in fruits[new_head_x]:
             grow = True;
-
-            sound = pygame.mixer.Sound("assets/pick1.wav")
-            sound.play()
-
+            game.onFruitPick(self)
             game.removeFruit(new_head_x, new_head_y)
 
         new_head = (new_head_x, new_head_y)
 
         if game.board[new_head_x][new_head_y] > 0:
+            game.onSnakeDie(self)
             self.life -= 0.1
-            sound = pygame.mixer.Sound("assets/dead1.wav")
-            sound.play()
             return
 
         game.board[new_head_x][new_head_y] = 1;

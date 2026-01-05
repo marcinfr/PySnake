@@ -1,5 +1,5 @@
 import pygame
-from game.boardView import BoardView
+from game.levels import Levels
 from game.snakeView import SnakeView
 from game.snake import Snake
 from game.controllers.keyboard import Keyboard
@@ -9,36 +9,18 @@ from collections import defaultdict
 from helpers.events import Events
 from helpers.timer import Timer
 import math
+from game.boardView.classic import ClassicBoardView
 
 class Game:
     def __init__(self, screen):
         self.screen = screen
         self.isRunning = False
+        self.players = []
         Events.addEventListener("game-esc", "key_down_" + str(pygame.K_ESCAPE), self.pause)
 
-    def start(self, width, height, players = None):
+    def start(self, players = []):
         self.pointsBarHeight = 80
-        self.counterToStart = 3
         self.players = players
-        self.width = width
-        self.height = height
-        self.snakes = []
-        self.isRunning = True
-        self.isEndGame = False
-        self.board = [[0 for _ in range(height)] for _ in range(width)]
-        self.fruits = defaultdict(dict)
-        screenWidth, screenHeight = self.screen.get_size()
-        maxWidth = screenWidth
-        maxHeight = screenHeight - self.pointsBarHeight
-
-        initPositions = [
-            (3,3, (1,0)),
-            (width-3,height-3, (-1,0)),
-            (width-3,3, (0,1)),
-            (3,height-3, (0,-1)),
-        ]
-
-        playersCounter = 0
 
         if not self.players:
             self.players['main'] = {
@@ -46,49 +28,93 @@ class Game:
                 'color': 0
             }
 
+        #self.players['test'] = {
+        #    'type': 'test',
+        #    'color': 2
+        #}
+
+        self.snakes = []
+
         for player in self.players.values():
             if player['type'] == 'main':
                 controller = Keyboard()
-            if player['type'] == 'joystick':
+            elif player['type'] == 'joystick':
                 controller = Pad(player['joystick'])
-            self.addSnake(initPositions[playersCounter], 3, controller, player['color'])
-            playersCounter += 1
+            else:
+                controller = None
+            self.addSnake(controller, player['color'])
 
-        print("Requested board size:", width, "x", height)
+        self.nextLevel();
+
+
+    def isLevelEnd(self):
+        if len(self.snakes) > 1 and self.aliveSnakes < 2:
+            return True
+        return False
+
+    def nextLevel(self):
+        self.level = Levels.getRandomLevel()
+        self.width = self.level['mapSize'][0]
+        self.height = self.level['mapSize'][1]
+
+        self.counterToStart = 3
+        self.isRunning = True
+        self.isEndGame = False
+        self.board = [[0 for _ in range(self.height)] for _ in range(self.width)]
+        self.fruits = defaultdict(dict)
+        screenWidth, screenHeight = self.screen.get_size()
+        maxWidth = screenWidth
+        maxHeight = screenHeight - self.pointsBarHeight
+        print("Requested board size:", self.width, "x", self.height)
         print("Screen size:", screenWidth, "x", screenHeight)
-
-        self.fieldSize = min(maxWidth // width, maxHeight // height)
-
-        print( self.fieldSize)
-        surfaceWidth = self.fieldSize * width
-        surfaceHeight = self.fieldSize * height
-
+        self.fieldSize = min(maxWidth // self.width, maxHeight // self.height)
+        surfaceWidth = self.fieldSize * self.width
+        surfaceHeight = self.fieldSize * self.height
         print("Game initialized with board size:", surfaceWidth, "x", surfaceHeight)
-
         self.gameSurface = pygame.Surface((surfaceWidth, surfaceHeight))
-        self.boardView = BoardView(self.gameSurface, self.fieldSize)
+        self.boardView = ClassicBoardView()
+        self.boardView.init(self.gameSurface, self.fieldSize)
         self.snakeView = SnakeView(self.gameSurface, self.fieldSize)
-        #self.snake = Snake(1, [(5, 5), (5, 6), (5, 7), (5, 8), (5, 9)])
-        #self.keyboard = Keyboard()
-        #self.keyboard.setSnake(self.snake)
+
+        snakeLength = self.level['snakeLenght']
+        startPositions = self.level['startPositions']
+        walls = self.level['walls']
+        for wall in walls:
+            x1 = wall[0][0]
+            y1 = wall[0][1]
+            x2 = wall[1][0]
+            y2 = wall[1][1]
+            dx = abs(x2 - x1)
+            dy = abs(y2 - y1)
+            sx = 1 if x1 < x2 else -1
+            sy = 1 if y1 < y2 else -1
+            err = dx - dy
+            while True:
+                self.board[x1][y1] = 2
+                if x1 == x2 and y1 == y2:
+                    break
+                e2 = 2 * err
+                if e2 > -dy:
+                    err -= dy
+                    x1 += sx
+                if e2 < dx:
+                    err += dx
+                    y1 += sy
+
+        self.aliveSnakes = 0
+        for snakeNumber, snake in enumerate(self.snakes):
+            position = startPositions[snakeNumber][0]
+            direction = startPositions[snakeNumber][1]
+            snake.segments = [(position[0] - (i * direction[0]), position[1] - (i * direction[1])) for i in range(snakeLength)]
+            snake.setDirection(direction)
+            snake.life = 1
+            self.aliveSnakes += 1
+
         self.addRandomFruit()
 
-    def isLevelEnd():
-        pass
-
-    def nextLevel():
-        pass
     
-    def addSnake(self, position, length, controller, color):
-        if (len(position) > 2):
-            direction = position[2]
-        else:
-            direction = (1,0)
-
-        segments = [(position[0] - (i * direction[0]), position[1] - (i * direction[1])) for i in range(length)]
-        print(segments)
-        snake = Snake(len(self.snakes), segments, color)
-        snake.setDirection(direction)
+    def addSnake(self, controller, color):
+        snake = Snake(len(self.snakes), [], color)
         if controller:
             controller.setSnake(snake)
         self.snakes.append(snake)
@@ -102,15 +128,20 @@ class Game:
                     sound.play()
                 self.counterToStart -= 0.1
         else:
+            self.aliveSnakes = 0
             for snake in self.snakes:
                 if snake.life > 0:
                     isAliveSnake = True
+                    self.aliveSnakes += 1
                 if snake.life == 1:
                     snake.move(self)
                 elif snake.life > 0:
                     snake.die(self)
-            if not isAliveSnake:
-                #self.start(self.width, self.height, self.players)
+
+            if self.isLevelEnd():
+                self.nextLevel();
+            elif not isAliveSnake:
+                #self.start(self.players)
                 self.stop()
 
     def stop(self):
@@ -129,9 +160,9 @@ class Game:
         self.boardView.displayFruits(self.fruits)
         for snake in self.snakes:
             self.snakeView.display(snake)
+        self.displayCounter()
+        self.displayPoints()
         posX = (self.screen.get_width() - self.gameSurface.get_width()) // 2
-        self.displayCounter()    
-
         self.screen.blit(self.gameSurface, (posX, self.pointsBarHeight))
 
     def displayCounter(self):
@@ -148,6 +179,18 @@ class Game:
         centerY = self.gameSurface.get_height() / 2
         textRect.center = (centerX, centerY)
         self.gameSurface.blit(text, textRect)
+
+    def displayPoints(self):
+        for snakeNumber, snake in enumerate(self.snakes):
+            pygame.draw.rect(self.screen, snake.color, (
+                snakeNumber * 200 + 20,
+                20,
+                40,
+                40,
+            ))
+            font = pygame.font.Font(None, 40)
+            text = font.render(str(snake.totalPoints), True, "White")
+            self.screen.blit(text, (snakeNumber * 200 + 70, 30))
 
     def addRandomFruit(self):
         x = randrange(0, len(self.board))
@@ -167,3 +210,11 @@ class Game:
         self.addRandomFruit()
         self.board[x][y] = 0
         
+    def onSnakeDie(self, snake):
+        sound = pygame.mixer.Sound("assets/dead1.wav")
+        sound.play()
+
+    def onFruitPick(self, sneak):
+        sound = pygame.mixer.Sound("assets/pick1.wav")
+        sound.play()
+        sneak.totalPoints += 1

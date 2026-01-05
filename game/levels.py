@@ -1,0 +1,114 @@
+from random import randrange
+from game.boardView.classic import ClassicBoardView
+from game.boardView.space import SpaceBoardView
+
+
+class Levels:
+    LEVELS = [
+        {
+            'mapSize': (32, 18),
+            'snakeLenght': 3,
+            'startPositions': (
+                ((3,3), (1,0)),
+                ((28,14), (-1,0)),
+                ((28,3), (0,1)),
+                ((3,14), (0,-1)),
+            ),
+            'walls': ()
+        },
+        {
+            'mapSize': (32, 18),
+            'snakeLenght': 3,
+            'startPositions': (
+                ((3,3), (1,0)),
+                ((28,14), (-1,0)),
+                ((28,3), (0,1)),
+                ((3,14), (0,-1)),
+            ),
+            'walls': (
+                ((0,0),(31,0)),
+                ((0,0),(0,17)),
+                ((31,0),(31,17)),
+                ((0,17),(31,17)),
+            )
+        },
+        {
+            'mapSize': (32, 18),
+            'snakeLenght': 3,
+            'startPositions': (
+                ((3,3), (1,0)),
+                ((28,14), (-1,0)),
+                ((28,3), (0,1)),
+                ((3,14), (0,-1)),
+            ),
+            'walls': (
+                ((15,0),(15,17)),
+                ((16,0),(16,17)),
+                ((0,8),(31,8)),
+                ((0,9),(31,9)),
+            )
+        },
+        {
+            'mapSize': (32, 18),
+            'snakeLenght': 3,
+            'startPositions': (
+                ((3,3), (1,0)),
+                ((28,14), (-1,0)),
+                ((28,3), (0,1)),
+                ((3,14), (0,-1)),
+            ),
+            'walls': (
+                ((10,5),(21,5)),
+                ((10,12),(21,12)),
+            )
+        },
+        {
+            'mapSize': (32, 18),
+            'snakeLenght': 3,
+            'startPositions': (
+                ((3,3), (1,0)),
+                ((28,14), (-1,0)),
+                ((28,3), (0,1)),
+                ((3,14), (0,-1)),
+            ),
+            'walls': (
+                ((0,0),(0,5)),
+                ((0,0),(5,0)),
+                ((26,0),(31,0)),
+                ((31,0),(31,5)),
+                ((0,17),(5,17)),
+                ((0,12),(0,17)),
+                ((26,17),(31,17)),
+                ((31,12),(31,17)),
+            )
+        },
+                {
+            'mapSize': (32, 18),
+            'snakeLenght': 3,
+            'startPositions': (
+                ((3,3), (1,0)),
+                ((28,14), (-1,0)),
+                ((28,3), (0,1)),
+                ((3,14), (0,-1)),
+            ),
+            'walls': (
+                ((8,8),(9,8)),
+                ((8,9),(9,9)),
+                ((13,13),(14,13)),
+                ((13,14),(14,14)),
+                ((24,6),(25,6)),
+                ((24,7),(25,7)),
+                ((16,4),(17,4)),
+                ((16,5),(17,5)),
+            )
+        },
+    ]
+
+    @staticmethod
+    def getLevel(levelNumber):
+        return Levels.LEVELS[levelNumber]
+    
+    @staticmethod
+    def getRandomLevel():
+        levelNumber = randrange(0, len(Levels.LEVELS))
+        return Levels.getLevel(levelNumber)
