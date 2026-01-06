@@ -1,5 +1,6 @@
 import pygame
 from game.levels import Levels
+from game.themes import Themes
 from game.snakeView import SnakeView
 from game.snake import Snake
 from game.controllers.keyboard import Keyboard
@@ -9,7 +10,6 @@ from collections import defaultdict
 from helpers.events import Events
 from helpers.timer import Timer
 import math
-from game.boardView.classic import ClassicBoardView
 
 class Game:
     def __init__(self, screen):
@@ -18,9 +18,10 @@ class Game:
         self.players = []
         Events.addEventListener("game-esc", "key_down_" + str(pygame.K_ESCAPE), self.pause)
 
-    def start(self, players = []):
+    def start(self, data = {}):
         self.pointsBarHeight = 80
-        self.players = players
+        self.players = data['players']
+        self.settings = data['settings']
 
         if not self.players:
             self.players['main'] = {
@@ -51,33 +52,11 @@ class Game:
         if len(self.snakes) > 1 and self.aliveSnakes < 2:
             return True
         return False
-
-    def nextLevel(self):
-        self.level = Levels.getRandomLevel()
-        self.width = self.level['mapSize'][0]
-        self.height = self.level['mapSize'][1]
-
-        self.counterToStart = 3
-        self.isRunning = True
-        self.isEndGame = False
-        self.board = [[0 for _ in range(self.height)] for _ in range(self.width)]
-        self.fruits = defaultdict(dict)
-        screenWidth, screenHeight = self.screen.get_size()
-        maxWidth = screenWidth
-        maxHeight = screenHeight - self.pointsBarHeight
-        print("Requested board size:", self.width, "x", self.height)
-        print("Screen size:", screenWidth, "x", screenHeight)
-        self.fieldSize = min(maxWidth // self.width, maxHeight // self.height)
-        surfaceWidth = self.fieldSize * self.width
-        surfaceHeight = self.fieldSize * self.height
-        print("Game initialized with board size:", surfaceWidth, "x", surfaceHeight)
-        self.gameSurface = pygame.Surface((surfaceWidth, surfaceHeight))
-        self.boardView = ClassicBoardView()
-        self.boardView.init(self.gameSurface, self.fieldSize)
-        self.snakeView = SnakeView(self.gameSurface, self.fieldSize)
-
-        snakeLength = self.level['snakeLenght']
-        startPositions = self.level['startPositions']
+    
+    def getBoard(self, level):
+        width = level['mapSize'][0]
+        height = level['mapSize'][1]
+        board = [[0 for _ in range(height)] for _ in range(width)]
         walls = self.level['walls']
         for wall in walls:
             x1 = wall[0][0]
@@ -90,7 +69,7 @@ class Game:
             sy = 1 if y1 < y2 else -1
             err = dx - dy
             while True:
-                self.board[x1][y1] = 2
+                board[x1][y1] = 2
                 if x1 == x2 and y1 == y2:
                     break
                 e2 = 2 * err
@@ -100,6 +79,40 @@ class Game:
                 if e2 < dx:
                     err += dx
                     y1 += sy
+        return board
+
+    
+    def nextLevel(self):
+        self.level = Levels.getRandomLevel()
+        themeId = self.settings['theme']
+        if themeId == None:
+            self.theme = Themes.getRandomTheme()
+        else:
+            self.theme = Themes.getTheme(themeId)
+        self.width = self.level['mapSize'][0]
+        self.height = self.level['mapSize'][1]
+
+        self.counterToStart = 3
+        self.isRunning = True
+        self.isEndGame = False
+        self.board = self.getBoard(self.level)
+        self.fruits = defaultdict(dict)
+        screenWidth, screenHeight = self.screen.get_size()
+        maxWidth = screenWidth
+        maxHeight = screenHeight - self.pointsBarHeight
+        print("Requested board size:", self.width, "x", self.height)
+        print("Screen size:", screenWidth, "x", screenHeight)
+        self.fieldSize = min(maxWidth // self.width, maxHeight // self.height)
+        surfaceWidth = self.fieldSize * self.width
+        surfaceHeight = self.fieldSize * self.height
+        print("Game initialized with board size:", surfaceWidth, "x", surfaceHeight)
+        self.gameSurface = pygame.Surface((surfaceWidth, surfaceHeight))
+        self.boardView = self.theme['boardView']
+        self.boardView.init(self.gameSurface, self.fieldSize)
+        self.snakeView = SnakeView(self.gameSurface, self.fieldSize)
+
+        snakeLength = self.level['snakeLenght']
+        startPositions = self.level['startPositions']
 
         self.aliveSnakes = 0
         for snakeNumber, snake in enumerate(self.snakes):

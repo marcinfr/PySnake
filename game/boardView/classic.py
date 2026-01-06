@@ -9,18 +9,38 @@ class ClassicBoardView:
         self.screen = screen
         self.fieldSize = fieldSize
         self.background = None
+        self.topLayer = None
 
     def display(self, board):
+        self.screen.blit(self.getBackground(board), (0, 0))
+        self.screen.blit(self.getTopLayer(board), (0, 0))
+
+    def getBackground(self, board):
         if (self.background is None):
             width = len(board)
             height = len(board[0])
             self.background = pygame.Surface((self.fieldSize * width, self.fieldSize * height))
-            for x, row in enumerate(board):
+            self.drawBackground(board)
+        return self.background
+    
+    def getTopLayer(self, board):
+        if (self.topLayer is None):
+            width = len(board)
+            height = len(board[0])
+            self.topLayer = pygame.Surface((self.fieldSize * width, self.fieldSize * height), pygame.SRCALPHA)
+            self.drawTopLayer(board)
+        return self.topLayer
+    
+    def drawTopLayer(self, board):
+        for x, row in enumerate(board):
+            for y, value in enumerate(row):
+                if (value == 2):
+                    self.drawWall(self.topLayer, x, y)
+
+    def drawBackground(self, board):
+        for x, row in enumerate(board):
                 for y, value in enumerate(row):
                     self.drawField(self.background, x, y)
-                    if (value == 2):
-                        self.drawWall(self.background, x, y)
-        self.screen.blit(self.background, (0, 0))
 
     def displayFruits(self, fruits):
         for x, inner in fruits.items():
@@ -47,7 +67,7 @@ class ClassicBoardView:
                 (x * self.fieldSize, y * self.fieldSize + self.fieldSize),
             ]
         )
-        pygame.draw.polygon(surface, "black", 
+        pygame.draw.polygon(surface, (20,20,20), 
             [
                 (x * self.fieldSize + self.fieldSize, y * self.fieldSize + self.fieldSize),
                 (x * self.fieldSize + self.fieldSize, y * self.fieldSize),

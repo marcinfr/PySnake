@@ -1,36 +1,71 @@
 import pygame
+from game.boardView.classic import ClassicBoardView
+from random import randrange
+from helpers.timer import Timer
+import math
 
-class SpaceBoardView:
+class SpaceBoardView(ClassicBoardView):
 
     COLOR_LIGHT = (170, 215, 81)
     COLOR_DARK = (162, 209, 73)
 
-    def init(self, screen, fieldSize):
-        self.screen = screen
-        self.fieldSize = fieldSize
-        self.background = None
-        self.stars = []
+    def drawField(self, surface, x, y):
+        pygame.draw.rect(surface, "black", (
+            x * self.fieldSize,
+            y * self.fieldSize,
+            self.fieldSize,
+            self.fieldSize,
+        ))
 
-    def display(self, board):
-        if (self.background is None):
-            width = len(board)
-            height = len(board[0])
-            self.background = pygame.Surface((self.fieldSize * width, self.fieldSize * height))
+    def getBackground(self, board):
+        ClassicBoardView.getBackground(self, board)
+        move = False
+        if Timer().has_elapsed("stars", 0.02):
+            move = True
             self.background.fill("black")
-        self.screen.blit(self.background, (0, 0))
+        for star in self.stars:
+            if star[1] == 0:
+                color = "white"
+                speed = 2
+            if star[1] == 1:
+                color = (100,100,100)
+                speed = 1
+            pygame.draw.circle(
+                self.background,
+                color,
+                (star[0]),
+                1
+            )
+            if move:
+                star[0][0] -= speed
+                if star[0][0] < 0:
+                    star[0][0] = self.background.get_width()
+        return self.background
     
-    def displayFruits(self, fruits):
-        for x, inner in fruits.items():
-            for y, value in inner.items():
-                self.drawFruit(x, y)
+    def drawBackground(self, board):
+        ClassicBoardView.drawBackground(self, board)
+        self.stars = []
+        for i in range(self.background.get_width() * self.background.get_height() // 100000):
+            x = randrange(0, self.background.get_width())
+            y = randrange(0, self.background.get_height())
+            self.stars.append(([x, y], 0))
+            x = randrange(0, self.background.get_width())
+            y = randrange(0, self.background.get_height())
+            self.stars.append(([x, y], 1))
+
 
     def drawFruit(self, x, y):
-        pygame.draw.circle(
-            self.screen,
-            (255, 0, 0),
-            (
-                (self.fieldSize // 2) + (self.fieldSize * x),
-                (self.fieldSize // 2) + (self.fieldSize * y)
-            ),
-            self.fieldSize // 4
-        )
+        cx = (self.fieldSize // 2) + (self.fieldSize * x)
+        cy = (self.fieldSize // 2) + (self.fieldSize * y)
+        radius = self.fieldSize // 4
+        points = []
+
+        for i in range(10):
+            angle = i * math.pi / 5  # 36 stopni
+            r = radius if i % 2 == 0 else radius / 2
+            x = cx + math.cos(angle - math.pi / 2) * r
+            y = cy + math.sin(angle - math.pi / 2) * r
+            points.append((x, y))
+
+
+        pygame.draw.polygon(self.screen, "white", points)

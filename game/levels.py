@@ -1,7 +1,4 @@
 from random import randrange
-from game.boardView.classic import ClassicBoardView
-from game.boardView.space import SpaceBoardView
-
 
 class Levels:
     LEVELS = [

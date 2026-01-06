@@ -2,6 +2,7 @@ import pygame
 from helpers.events import Events
 import math
 from game.snake import Snake
+from game.themes import Themes
 
 class Menu:
     def __init__(self, screen, main):
@@ -13,6 +14,7 @@ class Menu:
         self.background = None
         self.currentMenu = 'main'
         self.players = {}
+        self.gameSettings = {}
 
     def activate(self):
         self.isActive = True
@@ -57,7 +59,7 @@ class Menu:
             else:
                 button.isActive = False
             button.display(self.screen, x, y)
-            y += 120
+            y += 90
 
 
         if (self.currentMenu == 'multiplayer'):
@@ -74,15 +76,21 @@ class Menu:
             js.init()
         
     def openMenu(self, menu = None):
-        if (menu == 'main'):
+        if menu is not None:
+            self.currentMenu = menu
+
+        if (self.currentMenu == 'main'):
+            print("!!!");
             self.players = {}
-        if (menu == 'multiplayer'):
+            self.gameSettings = {
+                'level': None,
+                'theme': 0
+            }
+        if (self.currentMenu == 'multiplayer'):
             Events.addEventListener("menu_multiplayer_joy_button_down", "joy_button_down", self.addJoystickPlayer)
         else:
             Events.removeEventListener("menu_multiplayer_joy_button_down")
     
-        if menu is not None:
-            self.currentMenu = menu
         self.initButtons()
 
     def addJoystickPlayer(self):
@@ -136,17 +144,19 @@ class Menu:
         self.currentButton = 0
         self.buttons = []
         if (self.currentMenu == "main"):
-            self.addButton("SINGLE PLAYER", (self.main.startGame, {}))
+            self.addButton("SINGLE PLAYER", (self.main.startGame, {'players': {}, 'settings': self.gameSettings}))
             self.addButton("MULTI PLAYER", [self.openMenu, 'multiplayer'])
             self.addButton("EXIT", self.main.exit)
         if (self.currentMenu == "multiplayer"):
-            self.addButton("START", (self.main.startGame, self.players))
+            self.addButton("START", (self.main.startGame, {'players': self.players, 'settings': self.gameSettings}))
+            #self.addSelectLevelButton()
+            self.addSelectThemeButton()
             self.addButton("BACK", [self.openMenu, 'main'])
             self.addMainPlayer()
         if (self.currentMenu == "game"):
             if (not self.main.game.isEndGame):
                 self.addButton("RESUME", self.unPause)
-            self.addButton("PLAY AGAIN", (self.main.startGame, self.players))
+            self.addButton("PLAY AGAIN", (self.main.startGame, {'players': self.players, 'settings': self.gameSettings}))
             self.addButton("EXIT", [self.openMenu, 'main'])
 
     def unPause(self):
@@ -158,6 +168,12 @@ class Menu:
 
     def addPlayerButton(self, title, playerId, onClick = False):
         self.buttons.append(PlayerButton(title, onClick).setPlayerId(playerId).setPlayers(self.players))
+
+    def addSelectLevelButton(self):
+        self.buttons.append(SelectLevelButton('', self.selectNextLevel).setGameSettings(self.gameSettings))
+
+    def addSelectThemeButton(self):
+        self.buttons.append(SelectThemeButton('', self.selectNextTheme).setGameSettings(self.gameSettings))
 
     def displayBackground(self):
         if self.background:
@@ -199,9 +215,26 @@ class Menu:
         centerY = self.background.get_height() * 20 / 100 - (textRect.height / 2)
         textRect.center = (centerX, centerY)
         self.background.blit(text, textRect)
+    
+    def selectNextLevel(self):
+        if self.gameSettings['level'] == False:
+            self.gameSettings['level'] = 0
+        else:
+            self.gameSettings['level'] = False
+    
+    def selectNextTheme(self):
+        if self.gameSettings['theme'] == None:
+            self.gameSettings['theme'] = 0
+        else:
+            self.gameSettings['theme'] += 1
+
+        if self.gameSettings['theme'] >= len(Themes.THEMES):
+            self.gameSettings['theme'] = None
+
+        print(self.gameSettings['theme'])
 
 class Button:
-    def __init__(self, title, onClick = False):
+    def __init__(self, title = '', onClick = False):
         self.title = title
         self.textColor = "white"
         self.textColorActive = "black"
@@ -219,7 +252,7 @@ class Button:
 
     def getButton(self):
         width = 600
-        height = 100
+        height = 80
         button = pygame.Surface((width, height), pygame.SRCALPHA)
         if self.isDisabled:
             #button.fill((100, 100, 100, 255))
@@ -261,13 +294,54 @@ class PlayerButton(Button):
         color = Snake.COLORS[self.players[self.playerId]['color']];
 
         button = super().getButton()
-        size = button.get_height() - 20
+        size = button.get_height() - 10
         pygame.draw.rect(button, color, (
-            10,
-            10,
+            5,
+            5,
             size,
             size
         ))
         #button.blit(colorBox, (10, 10))
         return button
+
+class SelectLevelButton(Button):
+
+    def setGameSettings(self, gameSettings):
+        self.gameSettings = gameSettings
+        return self
+
+    def getButton(self):
+        if self.gameSettings['level']:
+            self.title = ""
+        else: 
+            self.title = "Random Level"
+        button = super().getButton()
+
+
+        if self.gameSettings['level']:
+            size = button.get_height() - 10
+            pygame.draw.rect(button, "black", (
+                (button.get_width() - size) // 2,
+                5,
+                size,
+                size
+            ))
+
+        return button
     
+class SelectThemeButton(Button):
+        
+    def setGameSettings(self, gameSettings):
+        self.gameSettings = gameSettings
+        return self
+    
+    def getButton(self):
+        if self.gameSettings['theme'] == None:
+            self.title = "Random"
+        else: 
+            theme = Themes.getTheme(self.gameSettings['theme'])
+            self.title = theme['name']
+
+        self.title = self.title + " Theme"
+        button = super().getButton()
+        return button
