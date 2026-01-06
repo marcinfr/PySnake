@@ -76,7 +76,7 @@ class Game:
         self.boardView.init(self.gameSurface, self.fieldSize)
         self.snakeView = SnakeView(self.gameSurface, self.fieldSize)
 
-        snakeLength = 10 #self.level['snakeLenght']
+        snakeLength = self.level['snakeLenght']
         startPositions = self.level['startPositions']
         walls = self.level['walls']
         for wall in walls:
@@ -105,7 +105,7 @@ class Game:
         for snakeNumber, snake in enumerate(self.snakes):
             position = startPositions[snakeNumber][0]
             direction = startPositions[snakeNumber][1]
-            snake.segments = [(position[0] - (i * direction[0]), position[1] - (i * direction[1])) for i in range(snakeLength)]
+            snake.segments = [(position[0] - (i * direction[0]), position[1] - (i * direction[1]), direction) for i in range(snakeLength)]
             snake.setDirection(direction)
             snake.life = 1
             self.aliveSnakes += 1

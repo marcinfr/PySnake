@@ -13,15 +13,9 @@ class SnakeView:
     def drawSegment(self, surface, snake, segmentNumber):
         x = snake.segments[segmentNumber][0]
         y = snake.segments[segmentNumber][1]
+        dir = snake.segments[segmentNumber][2]
         life = snake.life
         if life > 0:
-            #pygame.draw.rect(surface, snake.color, (
-            #    x * self.fieldSize + (self.fieldSize * (1 - snake.life) // 2),
-            #    y * self.fieldSize + (self.fieldSize * (1 - snake.life) // 2),
-            #    self.fieldSize * snake.life,
-            #    self.fieldSize * snake.life,
-            #))
-
             nextSegment = False
             prevSegment = False
             isCornerSegment = False
@@ -31,6 +25,7 @@ class SnakeView:
             elif segmentNumber == len(snake.segments) - 1:
                 prevSegment = snake.segments[segmentNumber - 1]
                 segment = self.getStraightSegment(snake) # tail
+                dir = prevSegment[2]
             else:
                 prevSegment = snake.segments[segmentNumber - 1]
                 nextSegment = snake.segments[segmentNumber + 1]
@@ -42,36 +37,23 @@ class SnakeView:
                     segment = self.getCornerSegment(snake)
                     isCornerSegment = True
 
-            #if prevSegment and y == 0 and prevSegment[1] > 1:
-            #    prevSegment[1] = -1
-            #    print("!")
-
             if isCornerSegment:
-                if prevSegment[0] > nextSegment[0] and prevSegment[1] < nextSegment[1]:
-                    if x == prevSegment[0]:
-                        segment = pygame.transform.rotate(segment, 270)
-                    else:
-                        segment = pygame.transform.rotate(segment, 90)
-                elif prevSegment[0] < nextSegment[0] and prevSegment[1] < nextSegment[1]:
-                    if x == prevSegment[0]:
-                        segment = pygame.transform.rotate(segment, 180)
-                elif prevSegment[0] < nextSegment[0] and prevSegment[1] > nextSegment[1]:
-                    if x == prevSegment[0]:
-                        segment = pygame.transform.rotate(segment, 90)
-                    else:
-                        segment = pygame.transform.rotate(segment, 270)
-                elif x != prevSegment[0]:
-                    segment = pygame.transform.rotate(segment, 180)
-            elif prevSegment:
-                if prevSegment[1] != y:
-                    segment = pygame.transform.rotate(segment, 90)
-                if prevSegment[0] < x:
-                    segment = pygame.transform.rotate(segment, 180)
-            else:
-                if snake.direction[1] != 0:
-                    segment = pygame.transform.rotate(segment, 90)
-                if snake.direction[0] < 0:
-                    segment = pygame.transform.rotate(segment, 180)
+                prevDir = prevSegment[2]
+                if dir[0] < 0 and prevDir[1] > 0:
+                    dir = (0,-1)
+                elif dir[0] > 0 and prevDir[1] < 0:
+                    dir = (0,1)
+                elif dir[1] < 0 and prevDir[0] < 0:
+                    dir = (1,0)
+                elif dir[1] > 0 and prevDir[0] > 0:
+                    dir = (-1,0)
+            
+            if (dir[0] < 0):
+                segment = pygame.transform.rotate(segment, 180)
+            elif (dir[1] < 0):
+                segment = pygame.transform.rotate(segment, 90)
+            elif (dir[1] > 0):
+                segment = pygame.transform.rotate(segment, 270)
 
             if (snake.life < 1):
                 segment = pygame.transform.scale(segment, (self.fieldSize * snake.life, self.fieldSize * snake.life))
@@ -83,11 +65,6 @@ class SnakeView:
                     y * self.fieldSize + (self.fieldSize * (1 - snake.life) // 2),
                 )
             )
-
-            #pygame.draw.line(surface, "black", (x * self.fieldSize,y * self.fieldSize),  ((x + 1) * self.fieldSize,y * self.fieldSize), 2)
-            #pygame.draw.line(surface, "black", (x * self.fieldSize,y * self.fieldSize),  (x * self.fieldSize,(y + 1) * self.fieldSize), 2)
-            #pygame.draw.line(surface, "black", ((x+1) * self.fieldSize,y * self.fieldSize),  ((x+1) * self.fieldSize,(y + 1) * self.fieldSize), 2)
-            #pygame.draw.line(surface, "black", (x * self.fieldSize,(y+1) * self.fieldSize),  ((x+1) * self.fieldSize,(y + 1) * self.fieldSize), 2)
 
     def getStraightSegment(self, snake):
         cacheId = 'straight-' + str(snake.id)
