@@ -31,7 +31,7 @@ class Snake:
         self.direction = self.nextDirection
         board = game.board
         
-        head_x, head_y = self.segments[0]
+        head_x, head_y, head_dir = self.segments[0]
         dir_x, dir_y = self.direction
 
         new_head_x = head_x + dir_x
@@ -53,7 +53,7 @@ class Snake:
             game.onFruitPick(self)
             game.removeFruit(new_head_x, new_head_y)
 
-        new_head = (new_head_x, new_head_y)
+        new_head = (new_head_x, new_head_y, self.direction)
 
         if game.board[new_head_x][new_head_y] > 0:
             game.onSnakeDie(self)
