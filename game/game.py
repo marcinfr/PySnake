@@ -76,7 +76,7 @@ class Game:
         self.boardView.init(self.gameSurface, self.fieldSize)
         self.snakeView = SnakeView(self.gameSurface, self.fieldSize)
 
-        snakeLength = self.level['snakeLenght']
+        snakeLength = 10 #self.level['snakeLenght']
         startPositions = self.level['startPositions']
         walls = self.level['walls']
         for wall in walls:
