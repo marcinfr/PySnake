@@ -1,7 +1,6 @@
 import pygame
 from game.levels import Levels
 from game.themes import Themes
-from game.snakeView import SnakeView
 from game.snake import Snake
 from game.controllers.keyboard import Keyboard
 from game.controllers.pad import Pad
@@ -109,7 +108,8 @@ class Game:
         self.gameSurface = pygame.Surface((surfaceWidth, surfaceHeight))
         self.boardView = self.theme['boardView']
         self.boardView.init(self.gameSurface, self.fieldSize)
-        self.snakeView = SnakeView(self.gameSurface, self.fieldSize)
+        self.snakeView = self.theme['snakeView']
+        self.snakeView.init(self.gameSurface, self.fieldSize)
 
         snakeLength = self.level['snakeLenght']
         startPositions = self.level['startPositions']
@@ -121,6 +121,7 @@ class Game:
             snake.segments = [(position[0] - (i * direction[0]), position[1] - (i * direction[1]), direction) for i in range(snakeLength)]
             snake.setDirection(direction)
             snake.life = 1
+            snake.offsetRate = self.snakeView.offsetRate
             self.aliveSnakes += 1
 
         self.addRandomFruit()
@@ -145,7 +146,7 @@ class Game:
             for snake in self.snakes:
                 if snake.life > 0:
                     isAliveSnake = True
-                    self.aliveSnakes += 1
+                    self.aliveSnakes += 0.1
                 if snake.life == 1:
                     snake.move(self)
                 elif snake.life > 0:

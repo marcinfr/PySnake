@@ -36,10 +36,12 @@ class Timer:
     @staticmethod
     def has_elapsed(code, seconds, reset_if_elapsed = True):
         elapsed_time = Timer.get_elapsed_time(code)
+        print(code + " " + str(elapsed_time))
         if elapsed_time is not False and elapsed_time < seconds:
             return False
         if reset_if_elapsed:
             Timer.set_time(code)
+        print(code + " True")
         return True
 
     @staticmethod

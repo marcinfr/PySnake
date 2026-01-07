@@ -57,6 +57,7 @@ class SpaceBoardView(ClassicBoardView):
     def drawFruit(self, x, y):
         cx = (self.fieldSize // 2) + (self.fieldSize * x)
         cy = (self.fieldSize // 2) + (self.fieldSize * y)
+
         radius = self.fieldSize // 4
         points = []
 

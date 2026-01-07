@@ -80,7 +80,6 @@ class Menu:
             self.currentMenu = menu
 
         if (self.currentMenu == 'main'):
-            print("!!!");
             self.players = {}
             self.gameSettings = {
                 'level': None,

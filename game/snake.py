@@ -19,13 +19,18 @@ class Snake:
         self.color = self.COLORS[color]
         self.setDirection((1,0))
         self.totalPoints = 0
+        self.offset = 0.1
+        self.offsetRate = 1
 
     def setDirection(self, dir):
         self.direction = dir
         self.nextDirection = self.direction
 
     def move(self, game):
-        if not Timer().has_elapsed("snake-move-" + str(self.id), self.speed):
+        if Timer().has_elapsed("snake-move-" + str(self.id), self.speed * self.offsetRate):
+            self.offset -= self.offsetRate
+
+        if self.offset > 0:
             return
         
         self.direction = self.nextDirection
@@ -59,7 +64,8 @@ class Snake:
             game.onSnakeDie(self)
             self.life -= 0.1
             return
-
+        
+        self.offset = 1
         game.board[new_head_x][new_head_y] = 1;
 
         self.segments = [new_head] + self.segments
@@ -69,13 +75,14 @@ class Snake:
             game.board[lastSegment[0]][lastSegment[1]] = 0
 
     def die(self, game):
+        self.offset = 0
         if not Timer().has_elapsed("snake-die-" + str(self.id), 0.1):
             return
         self.life -= 0.1
         if self.life <= 0:
             self.life = 0
             for segment in self.segments:
-                 game.board[segment[0]][segment[1]] = 0
+                game.board[segment[0]][segment[1]] = 0
 
     def moveUp(self):
         if self.direction[1] != 1:

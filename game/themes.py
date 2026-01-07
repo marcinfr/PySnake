@@ -2,15 +2,20 @@ from random import randrange
 from game.boardView.classic import ClassicBoardView
 from game.boardView.space import SpaceBoardView
 
+from game.snakeView.default import DefaultSnakeView
+from game.snakeView.rocket import RocketSnakeView
+
 class Themes:
     THEMES = [
         {
             'name': "Classic",
-            'boardView': ClassicBoardView()
+            'boardView': ClassicBoardView(),
+            'snakeView': DefaultSnakeView(),
         },
         {
             'name': "Space",
-            'boardView': SpaceBoardView()
+            'boardView': SpaceBoardView(),
+            'snakeView': RocketSnakeView(),
         }
     ]
 

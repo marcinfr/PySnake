@@ -1,7 +1,10 @@
 import pygame
 
-class SnakeView:
-    def __init__(self, screen, fieldSize):
+class DefaultSnakeView:
+
+    offsetRate = 1
+
+    def init(self, screen, fieldSize):
         self.screen = screen
         self.fieldSize = fieldSize
         self.cachedSegemnts = {}
@@ -9,6 +12,7 @@ class SnakeView:
     def display(self, snake):
         for segmentNumber in range(len(snake.segments)):
             self.drawSegment(self.screen, snake, segmentNumber)
+        self.drawSegment(self.screen, snake, 0)
 
     def drawSegment(self, surface, snake, segmentNumber):
         x = snake.segments[segmentNumber][0]
@@ -20,11 +24,11 @@ class SnakeView:
             prevSegment = False
             isCornerSegment = False
             if segmentNumber == 0:
-                segment = self.getStraightSegment(snake) # head
+                segment = self.getHeadSegment(snake) # head
                 nextSegment = snake.segments[segmentNumber + 1]
             elif segmentNumber == len(snake.segments) - 1:
                 prevSegment = snake.segments[segmentNumber - 1]
-                segment = self.getStraightSegment(snake) # tail
+                segment = self.getTailSegment(snake) # tail
                 dir = prevSegment[2]
             else:
                 prevSegment = snake.segments[segmentNumber - 1]
@@ -58,13 +62,36 @@ class SnakeView:
             if (snake.life < 1):
                 segment = pygame.transform.scale(segment, (self.fieldSize * snake.life, self.fieldSize * snake.life))
 
+            if segmentNumber == 0 and snake.offsetRate < 1:
+                offsetX = dir[0] * snake.offset * self.fieldSize
+                offsetY = dir[1] * snake.offset * self.fieldSize
+            elif segmentNumber == len(snake.segments) - 1 and snake.offsetRate < 1:
+                offsetX = 1 + (-1) * dir[0] * (1 - snake.offset) * self.fieldSize
+                offsetY = 1 + (-1) * dir[1] * (1 - snake.offset) * self.fieldSize
+            else:
+                offsetX = 0
+                offsetY = 0
+
+            #pygame.draw.rect(surface, "red", (
+            #    x * self.fieldSize + (self.fieldSize * (1 - snake.life) // 2),
+            #    y * self.fieldSize + (self.fieldSize * (1 - snake.life) // 2),
+            #    self.fieldSize,
+            #    self.fieldSize
+            #))
+
             surface.blit(
                 segment, 
                 (
-                    x * self.fieldSize + (self.fieldSize * (1 - snake.life) // 2), 
-                    y * self.fieldSize + (self.fieldSize * (1 - snake.life) // 2),
+                    x * self.fieldSize + (self.fieldSize * (1 - snake.life) // 2) - offsetX,
+                    y * self.fieldSize + (self.fieldSize * (1 - snake.life) // 2) - offsetY,
                 )
             )
+
+    def getHeadSegment(self, snake):
+        return self.getStraightSegment(snake)
+    
+    def getTailSegment(self, snake):
+        return self.getStraightSegment(snake)
 
     def getStraightSegment(self, snake):
         cacheId = 'straight-' + str(snake.id)
