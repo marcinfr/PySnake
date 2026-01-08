@@ -13,6 +13,7 @@ class Menu:
         self.isActive = False
         self.background = None
         self.currentMenu = 'main'
+        self.joysticksCounter = 0
         self.players = {}
         self.gameSettings = {}
 
@@ -68,12 +69,15 @@ class Menu:
 
     def initJoysticks(self):
         count = pygame.joystick.get_count()
-        #print("Wykryte kontrolery:", count)
-        #Button("Wykryte kontrolery:" + str(count), False).display(self.screen, x, y)
+        if self.joysticksCounter != count:
+            print("Wykryte kontrolery:", count)
+            for i in range(count):
+                js = pygame.joystick.Joystick(i)
+                js.init()
+                print("init joystick: " + js.get_name() + " id: " + str(js.get_id()))
+                Events.addJoystick(js)
 
-        for i in range(count):
-            js = pygame.joystick.Joystick(i)
-            js.init()
+            self.joysticksCounter = count
         
     def openMenu(self, menu = None):
         if menu is not None:

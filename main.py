@@ -18,8 +18,12 @@ class Main:
         self.menu.activate()
 
     def exit(self):
+        print("pygame.quit")
         pygame.quit()
+        print("sys.exit")
         sys.exit()
+        print("EXIT")
+
 
     def startGame(self, data):
         self.menu.deactivate()

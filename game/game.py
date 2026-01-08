@@ -146,7 +146,7 @@ class Game:
             for snake in self.snakes:
                 if snake.life > 0:
                     isAliveSnake = True
-                    self.aliveSnakes += 0.1
+                    self.aliveSnakes += 1
                 if snake.life == 1:
                     snake.move(self)
                 elif snake.life > 0:
