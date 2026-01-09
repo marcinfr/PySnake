@@ -24,21 +24,21 @@ class DefaultSnakeView:
             prevSegment = False
             isCornerSegment = False
             if segmentNumber == 0:
-                segment = self.getHeadSegment(snake) # head
+                segment = self.getHeadSegment(snake, segmentNumber) # head
                 nextSegment = snake.segments[segmentNumber + 1]
             elif segmentNumber == len(snake.segments) - 1:
                 prevSegment = snake.segments[segmentNumber - 1]
-                segment = self.getTailSegment(snake) # tail
+                segment = self.getTailSegment(snake, segmentNumber) # tail
                 dir = prevSegment[2]
             else:
                 prevSegment = snake.segments[segmentNumber - 1]
                 nextSegment = snake.segments[segmentNumber + 1]
                 if prevSegment[0] == nextSegment[0]:
-                    segment = self.getStraightSegment(snake)
+                    segment = self.getStraightSegment(snake, segmentNumber)
                 elif prevSegment[1] == nextSegment[1]:
-                    segment = self.getStraightSegment(snake)
+                    segment = self.getStraightSegment(snake, segmentNumber)
                 else:
-                    segment = self.getCornerSegment(snake)
+                    segment = self.getCornerSegment(snake, segmentNumber)
                     isCornerSegment = True
 
             if isCornerSegment:
@@ -59,41 +59,35 @@ class DefaultSnakeView:
             elif (dir[1] > 0):
                 segment = pygame.transform.rotate(segment, 270)
 
-            if (snake.life < 1):
-                segment = pygame.transform.scale(segment, (self.fieldSize * snake.life, self.fieldSize * snake.life))
-
             if segmentNumber == 0 and snake.offsetRate < 1:
                 offsetX = dir[0] * snake.offset * self.fieldSize
                 offsetY = dir[1] * snake.offset * self.fieldSize
-            elif segmentNumber == len(snake.segments) - 1 and snake.offsetRate < 1:
-                offsetX = 1 + (-1) * dir[0] * (1 - snake.offset) * self.fieldSize
-                offsetY = 1 + (-1) * dir[1] * (1 - snake.offset) * self.fieldSize
+            #elif segmentNumber == len(snake.segments) - 1 and snake.offsetRate < 1:
+            #    offsetX = 1 + (-1) * dir[0] * (1 - snake.offset) * self.fieldSize
+            #    offsetY = 1 + (-1) * dir[1] * (1 - snake.offset) * self.fieldSize
             else:
                 offsetX = 0
                 offsetY = 0
 
-            #pygame.draw.rect(surface, "red", (
-            #    x * self.fieldSize + (self.fieldSize * (1 - snake.life) // 2),
-            #    y * self.fieldSize + (self.fieldSize * (1 - snake.life) // 2),
-            #    self.fieldSize,
-            #    self.fieldSize
-            #))
+            if (snake.life < 1):
+                segment = pygame.transform.scale(segment, (self.fieldSize * snake.life, self.fieldSize * snake.life))
+
+            px = x * self.fieldSize + self.fieldSize // 2 - offsetX
+            py = y * self.fieldSize + self.fieldSize // 2 - offsetY
+            rect = segment.get_rect(center=(px, py))
 
             surface.blit(
                 segment, 
-                (
-                    x * self.fieldSize + (self.fieldSize * (1 - snake.life) // 2) - offsetX,
-                    y * self.fieldSize + (self.fieldSize * (1 - snake.life) // 2) - offsetY,
-                )
+                rect
             )
 
-    def getHeadSegment(self, snake):
-        return self.getStraightSegment(snake)
+    def getHeadSegment(self, snake, segmentNumber):
+        return self.getStraightSegment(snake, segmentNumber)
     
-    def getTailSegment(self, snake):
-        return self.getStraightSegment(snake)
+    def getTailSegment(self, snake, segmentNumber):
+        return self.getStraightSegment(snake, segmentNumber)
 
-    def getStraightSegment(self, snake):
+    def getStraightSegment(self, snake, segmentNumber):
         cacheId = 'straight-' + str(snake.id)
         if cacheId not in self.cachedSegemnts:
             surface = pygame.Surface((self.fieldSize, self.fieldSize))
@@ -122,7 +116,7 @@ class DefaultSnakeView:
             self.cachedSegemnts[cacheId] = surface
         return self.cachedSegemnts[cacheId]
     
-    def getCornerSegment(self, snake):
+    def getCornerSegment(self, snake, segmentNumber):
         cacheId = 'corner-' + str(snake.id)
         if cacheId not in self.cachedSegemnts:
             surface = pygame.Surface((self.fieldSize, self.fieldSize), pygame.SRCALPHA)
@@ -202,6 +196,6 @@ class DefaultSnakeView:
             self.cachedSegemnts[cacheId] = surface
         return self.cachedSegemnts[cacheId]
 
-    def getSnakeColor(self, snake, factor=1):
+    def getSnakeColor(self, snake, factor=1, transp = 255):
         color = snake.color
-        return tuple(min(255, max(0, int(c * factor))) for c in color)
+        return tuple(min(255, max(0, int(c * factor))) for c in color) + (transp,)
