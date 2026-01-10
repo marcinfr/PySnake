@@ -48,8 +48,15 @@ class Menu:
         if (not self.isActive):
             self.activate()
 
-        self.screen.fill((0, 0, 0))
-        self.displayBackground()
+        if self.currentMenu == 'game':
+            dark_screen = pygame.Surface(self.screen.get_size(), pygame.SRCALPHA)
+            dark_screen.fill((0,0,0))
+            dark_screen.set_alpha(200)
+            self.screen.blit(dark_screen, (0,80))
+        else:
+            self.screen.fill((0, 0, 0))
+            self.displayBackground()
+        
 
         x = self.screen.get_width() // 2 - 300
         y = self.screen.get_height() * 20 / 100

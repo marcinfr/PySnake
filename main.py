@@ -1,6 +1,7 @@
 import pygame
 import sys
 from helpers.events import Events
+from helpers.timer import Timer
 from game.game import Game
 from menu.menu import Menu
 
@@ -10,9 +11,9 @@ class Main:
         pygame.init()
         pygame.mixer.init()
         pygame.display.set_caption("Snake")
-        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        #self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         #self.screen = pygame.display.set_mode((1280, 800))
-        #self.screen = pygame.display.set_mode((800, 600))
+        self.screen = pygame.display.set_mode((800, 600))
         self.game = Game(self.screen)
         self.menu = Menu(self.screen, self)
         self.menu.activate()
@@ -32,16 +33,32 @@ class Main:
         self.game.start(data)
 
     def run(self):
+
+        font = pygame.font.SysFont(None, 24)
+        clock = pygame.time.Clock()
+
         while True:
             Events.reset()
             if Events.QUIT:
                 self.exit()
+
+            clock.tick(1000)
             
             if (self.game.isRunning):
                 self.game.update()
                 self.game.display()
             else:
+                if (self.menu.currentMenu == 'game'):
+                    self.game.display()
                 self.menu.display()
+
+
+            if Timer.has_elapsed('fps', 1):
+                fps = clock.get_fps()
+                fps_text = font.render(f"FPS: {fps:.1f}", True, (255, 255, 255))
+                
+            self.screen.blit(fps_text, (self.screen.get_width() - 100, 10))
+
             pygame.display.flip()
 
 main = Main()
