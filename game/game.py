@@ -118,7 +118,7 @@ class Game:
         for snakeNumber, snake in enumerate(self.snakes):
             position = startPositions[snakeNumber][0]
             direction = startPositions[snakeNumber][1]
-            snake.segments = [(position[0] - (i * direction[0]), position[1] - (i * direction[1]), direction) for i in range(snakeLength)]
+            snake.segments = [{'x': position[0] - (i * direction[0]), 'y': position[1] - (i * direction[1]), 'dir': direction} for i in range(snakeLength)]
             snake.setDirection(direction)
             snake.life = 1
             snake.offsetRate = self.snakeView.offsetRate
@@ -238,7 +238,8 @@ class Game:
         sound.play()
 
     def onFruitPick(self, snake):
-        head_x, head_y, head_dir = snake.segments[0]
+        head_x = snake.segments[0]['x']
+        head_y = snake.segments[0]['y']
         fruitType = self.fruits[head_x][head_y]
         
         if fruitType == -1:

@@ -41,7 +41,8 @@ class Snake:
         self.direction = self.nextDirection
         board = game.board
         
-        head_x, head_y, head_dir = self.segments[0]
+        head_x = self.segments[0]['x']
+        head_y = self.segments[0]['y']
         dir_x, dir_y = self.direction
 
         new_head_x = head_x + dir_x
@@ -61,7 +62,7 @@ class Snake:
             self.life -= 0.1
             return
 
-        new_head = (new_head_x, new_head_y, self.direction)
+        new_head = {'x': new_head_x, 'y': new_head_y, 'dir': self.direction}
         self.segments = [new_head] + self.segments
 
         grow = False    
@@ -77,7 +78,7 @@ class Snake:
         if not grow:
             lastSegment = self.segments[-1]
             self.segments = self.segments[:-1]
-            game.board[lastSegment[0]][lastSegment[1]] = 0
+            game.board[lastSegment['x']][lastSegment['y']] = 0
 
     def die(self, game):
         self.offset = 0
@@ -88,7 +89,7 @@ class Snake:
             self.life = 0
         if self.life <= 0.6:
             for segment in self.segments:
-                game.board[segment[0]][segment[1]] = 0
+                game.board[segment['x']][segment['y']] = 0
 
     def moveUp(self):
         if self.direction[1] != 1:

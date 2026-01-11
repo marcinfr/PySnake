@@ -5,6 +5,7 @@ from game.boardView.retro import RetroBoardView
 
 from game.snakeView.default import DefaultSnakeView
 from game.snakeView.rocket import RocketSnakeView
+from game.snakeView.retro import RetroSnakeView
 
 class Themes:
     THEMES = [
@@ -13,11 +14,11 @@ class Themes:
             'boardView': ClassicBoardView(),
             'snakeView': DefaultSnakeView(),
         },
-        #{
-        #    'name': "Retro",
-        #    'boardView': RetroBoardView(),
-        #    'snakeView': DefaultSnakeView(),
-        #},
+        {
+            'name': "Retro",
+            'boardView': RetroBoardView(),
+            'snakeView': RetroSnakeView(),
+        },
         {
             'name': "Space",
             'boardView': SpaceBoardView(),

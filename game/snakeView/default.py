@@ -16,9 +16,9 @@ class DefaultSnakeView:
         self.drawSegment(self.screen, snake, 0)
 
     def drawSegment(self, surface, snake, segmentNumber):
-        x = snake.segments[segmentNumber][0]
-        y = snake.segments[segmentNumber][1]
-        dir = snake.segments[segmentNumber][2]
+        x = snake.segments[segmentNumber]['x']
+        y = snake.segments[segmentNumber]['y']
+        dir = snake.segments[segmentNumber]['dir']
         life = snake.life
         if life > 0:
             nextSegment = False
@@ -30,13 +30,13 @@ class DefaultSnakeView:
             elif segmentNumber == len(snake.segments) - 1:
                 prevSegment = snake.segments[segmentNumber - 1]
                 segment = self.getTailSegment(snake, segmentNumber) # tail
-                dir = prevSegment[2]
+                dir = prevSegment['dir']
             else:
                 prevSegment = snake.segments[segmentNumber - 1]
                 nextSegment = snake.segments[segmentNumber + 1]
-                if prevSegment[0] == nextSegment[0]:
+                if prevSegment['x'] == nextSegment['x']:
                     segment = self.getStraightSegment(snake, segmentNumber)
-                elif prevSegment[1] == nextSegment[1]:
+                elif prevSegment['y'] == nextSegment['y']:
                     segment = self.getStraightSegment(snake, segmentNumber)
                 else:
                     segment = self.getCornerSegment(snake, segmentNumber)
@@ -46,7 +46,7 @@ class DefaultSnakeView:
                 segment = self.getFrozenElement(snake, segmentNumber, segment)
 
             if isCornerSegment:
-                prevDir = prevSegment[2]
+                prevDir = prevSegment['dir']
                 if dir[0] < 0 and prevDir[1] > 0:
                     dir = (0,-1)
                 elif dir[0] > 0 and prevDir[1] < 0:
