@@ -21,18 +21,23 @@ class Snake:
         self.totalPoints = 0
         self.offset = 0.1
         self.offsetRate = 1
+        self.isFrozen = 0
 
     def setDirection(self, dir):
         self.direction = dir
         self.nextDirection = self.direction
 
     def move(self, game):
+        if self.isFrozen > 0:
+            self.unFreeze()
+            return
+
         if Timer().has_elapsed("snake-move-" + str(self.id), self.speed * self.offsetRate):
             self.offset -= self.offsetRate
 
         if self.offset > 0:
             return
-        
+                
         self.direction = self.nextDirection
         board = game.board
         
@@ -51,24 +56,24 @@ class Snake:
         elif new_head_y >= len(board[0]):
             new_head_y = 0
 
+        if game.board[new_head_x][new_head_y] > 0:
+            game.onSnakeDie(self)
+            self.life -= 0.1
+            return
+
+        new_head = (new_head_x, new_head_y, self.direction)
+        self.segments = [new_head] + self.segments
+
         grow = False    
         fruits = game.fruits
         if new_head_x in fruits and new_head_y in fruits[new_head_x]:
             grow = True;
             game.onFruitPick(self)
             game.removeFruit(new_head_x, new_head_y)
-
-        new_head = (new_head_x, new_head_y, self.direction)
-
-        if game.board[new_head_x][new_head_y] > 0:
-            game.onSnakeDie(self)
-            self.life -= 0.1
-            return
         
         self.offset = 1
         game.board[new_head_x][new_head_y] = 1;
 
-        self.segments = [new_head] + self.segments
         if not grow:
             lastSegment = self.segments[-1]
             self.segments = self.segments[:-1]
@@ -81,6 +86,7 @@ class Snake:
         self.life -= 0.1
         if self.life <= 0:
             self.life = 0
+        if self.life <= 0.6:
             for segment in self.segments:
                 game.board[segment[0]][segment[1]] = 0
 
@@ -99,3 +105,16 @@ class Snake:
     def moveRight(self):
         if self.direction[0] != -1:
             self.nextDirection = (1, 0)
+
+    def freeze(self, seconds):
+        if self.life < 1:
+            return
+        
+        Timer.set_time("snake-frozen-" + str(self.id))
+        self.isFrozen = seconds
+
+    
+    def unFreeze(self):
+        print( self.isFrozen)
+        if self.isFrozen > 0 and Timer().has_elapsed("snake-frozen-" + str(self.id), self.isFrozen):
+            self.isFrozen = 0;

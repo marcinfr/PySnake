@@ -1,4 +1,5 @@
 import pygame
+import random
 
 class DefaultSnakeView:
 
@@ -40,6 +41,9 @@ class DefaultSnakeView:
                 else:
                     segment = self.getCornerSegment(snake, segmentNumber)
                     isCornerSegment = True
+
+            if snake.isFrozen:
+                segment = self.getFrozenElement(snake, segmentNumber, segment)
 
             if isCornerSegment:
                 prevDir = prevSegment[2]
@@ -199,3 +203,51 @@ class DefaultSnakeView:
     def getSnakeColor(self, snake, factor=1, transp = 255):
         color = snake.color
         return tuple(min(255, max(0, int(c * factor))) for c in color) + (transp,)
+    
+    def getFrozenElement(self, snake, segmentNumber, segment):
+
+        cacheId = 'frozen-' + str((segmentNumber + snake.id) % 10)
+
+        if cacheId not in self.cachedSegemnts:
+            surface = pygame.Surface((self.fieldSize, self.fieldSize))
+            pygame.draw.rect(surface, (255,255,255), (
+                    0,
+                    0,
+                    self.fieldSize,
+                    self.fieldSize,
+                ))
+            
+            pygame.draw.rect(surface, (51,255,255), (
+                    0 + self.fieldSize // 20,
+                    0 + self.fieldSize // 20,
+                    self.fieldSize - self.fieldSize // 20 * 2,
+                    self.fieldSize - self.fieldSize // 20 * 2,
+                ))
+
+            for i in range(15):
+                w1, w2 = random.sample(range(4), 2)
+
+                p1 = self.randomWallPoint(self.fieldSize, w1)
+                p2 = self.randomWallPoint(self.fieldSize, w2)
+
+                pygame.draw.line(surface, 
+                    "white", 
+                    p1,
+                    p2,
+                    self.fieldSize // (20 * random.randint(1,3))
+                )
+
+            self.cachedSegemnts[cacheId] = surface
+        
+        return self.cachedSegemnts[cacheId]
+
+    @staticmethod
+    def randomWallPoint(x, wall):
+        if wall == 0:      # góra
+            return (random.randint(0, x), 0)
+        elif wall == 1:    # prawo
+            return (x, random.randint(0, x))
+        elif wall == 2:    # dół
+            return (random.randint(0, x), x)
+        else:              # lewo
+            return (0, random.randint(0, x))

@@ -4,7 +4,7 @@ from game.themes import Themes
 from game.snake import Snake
 from game.controllers.keyboard import Keyboard
 from game.controllers.pad import Pad
-from random import randrange
+import random
 from collections import defaultdict
 from helpers.events import Events
 from helpers.timer import Timer
@@ -122,9 +122,11 @@ class Game:
             snake.setDirection(direction)
             snake.life = 1
             snake.offsetRate = self.snakeView.offsetRate
+            snake.isFrozen = False
             self.aliveSnakes += 1
 
         self.addRandomFruit()
+        #self.addRandomFruit(-2)
 
     
     def addSnake(self, controller, color):
@@ -157,6 +159,11 @@ class Game:
             elif not isAliveSnake:
                 #self.start(self.players)
                 self.stop()
+
+            if self.isRunning and Timer().has_elapsed("spacial-fruit", 2):
+                if random.randint(0, 10) == 0:
+                    self.addRandomFruit(-2)
+
 
     def stop(self):
         self.isRunning = False
@@ -206,29 +213,42 @@ class Game:
             text = font.render(str(snake.totalPoints), True, "White")
             self.screen.blit(text, (snakeNumber * 200 + 70, 30))
 
-    def addRandomFruit(self):
-        x = randrange(0, len(self.board))
-        y = randrange(0, len(self.board[0]))
+    def addRandomFruit(self, type = -1):
+        x = random.randrange(0, len(self.board))
+        y = random.randrange(0, len(self.board[0]))
         if self.board[x][y] == 0:
-            self.addFruit(x, y)
+            self.addFruit(x, y, type)
         else:
-            self.addRandomFruit()
+            self.addRandomFruit(type)
 
-    def addFruit(self, x, y):
-        self.fruits[x][y] = 1
+    def addFruit(self, x, y, type = -1):
+        self.fruits[x][y] = type
         self.board[x][y] = -1
 
     def removeFruit(self, x, y):
         #if x in self.fruits and y in self.addFruitfruits[x]:
+        type = self.fruits[x][y]
         del self.fruits[x][y]
-        self.addRandomFruit()
+        if type == -1:
+            self.addRandomFruit()
         self.board[x][y] = 0
         
     def onSnakeDie(self, snake):
         sound = pygame.mixer.Sound("assets/dead1.wav")
         sound.play()
 
-    def onFruitPick(self, sneak):
-        sound = pygame.mixer.Sound("assets/pick1.wav")
+    def onFruitPick(self, snake):
+        head_x, head_y, head_dir = snake.segments[0]
+        fruitType = self.fruits[head_x][head_y]
+        
+        if fruitType == -1:
+            snake.totalPoints += 1
+            sound = pygame.mixer.Sound("assets/pick1.wav")
+
+        if fruitType == -2:
+            sound = pygame.mixer.Sound("assets/freezing1.mp3")
+            for s in self.snakes:
+                if s.id != snake.id:
+                    s.freeze(3)
+
         sound.play()
-        sneak.totalPoints += 1

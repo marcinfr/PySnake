@@ -54,9 +54,10 @@ class SpaceBoardView(ClassicBoardView):
             self.stars.append(([x, y], 1))
 
 
-    def drawFruit(self, x, y):
-        cx = (self.fieldSize // 2) + (self.fieldSize * x)
-        cy = (self.fieldSize // 2) + (self.fieldSize * y)
+    def getNormalFruitSruface(self):
+        surface = pygame.Surface((self.fieldSize, self.fieldSize), pygame.SRCALPHA)
+        cx = self.fieldSize // 2
+        cy = self.fieldSize // 2
 
         radius = self.fieldSize // 4
         points = []
@@ -69,4 +70,5 @@ class SpaceBoardView(ClassicBoardView):
             points.append((x, y))
 
 
-        pygame.draw.polygon(self.screen, "white", points)
+        pygame.draw.polygon(surface, "white", points)
+        return surface

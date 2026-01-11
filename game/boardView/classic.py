@@ -45,7 +45,7 @@ class ClassicBoardView:
     def displayFruits(self, fruits):
         for x, inner in fruits.items():
             for y, value in inner.items():
-                self.drawFruit(x, y)
+                self.drawFruit(value, x, y)
 
     def drawField(self, surface, x, y):
         if x % 2 == y % 2:
@@ -81,13 +81,53 @@ class ClassicBoardView:
             self.fieldSize - self.fieldSize * 0.2 * 2,
         ))
 
-    def drawFruit(self, x, y):
+    def drawFruit(self, value, x, y):
+        surface = False
+        if value == -1:
+            surface = self.getNormalFruitSruface()
+        elif value == -2:
+            surface = self.getFrozrenFruitSruface()
+
+        if surface:
+            offsetX = self.fieldSize - surface.get_width()
+            offsetY = self.fieldSize - surface.get_height()
+            self.screen.blit(
+                surface, 
+                (self.fieldSize * x + offsetX // 2, self.fieldSize * y + offsetY // 2)
+            )
+    
+    def getNormalFruitSruface(self):
+        surface = pygame.Surface((self.fieldSize, self.fieldSize), pygame.SRCALPHA)
+        color = (255, 0, 0)
+
         pygame.draw.circle(
-            self.screen,
-            (255, 0, 0),
+            surface,
+            color,
             (
-                (self.fieldSize // 2) + (self.fieldSize * x),
-                (self.fieldSize // 2) + (self.fieldSize * y)
+                surface.get_width() // 2,
+                 surface.get_height() // 2
             ),
             self.fieldSize // 4
         )
+        return surface
+
+    def getFrozrenFruitSruface(self):
+        surface = pygame.Surface((self.fieldSize // 2, self.fieldSize // 2), pygame.SRCALPHA)
+
+        pygame.draw.rect(surface, (255,255,255), (
+            0,
+            0,
+            surface.get_width(),
+            surface.get_height(),
+        ))
+            
+        margin = surface.get_width() // 10
+        
+        pygame.draw.rect(surface, (51,255,255), (
+            margin,
+            margin,
+            surface.get_width() - margin * 2,
+            surface.get_height() - margin * 2,
+        ))
+        
+        return surface
