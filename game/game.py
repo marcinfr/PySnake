@@ -249,6 +249,6 @@ class Game:
             sound = pygame.mixer.Sound("assets/freezing1.mp3")
             for s in self.snakes:
                 if s.id != snake.id:
-                    s.freeze(3)
+                    s.freeze(5)
 
         sound.play()

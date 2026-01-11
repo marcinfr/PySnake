@@ -1,6 +1,7 @@
 from random import randrange
 from game.boardView.classic import ClassicBoardView
 from game.boardView.space import SpaceBoardView
+from game.boardView.retro import RetroBoardView
 
 from game.snakeView.default import DefaultSnakeView
 from game.snakeView.rocket import RocketSnakeView
@@ -12,6 +13,11 @@ class Themes:
             'boardView': ClassicBoardView(),
             'snakeView': DefaultSnakeView(),
         },
+        #{
+        #    'name': "Retro",
+        #    'boardView': RetroBoardView(),
+        #    'snakeView': DefaultSnakeView(),
+        #},
         {
             'name': "Space",
             'boardView': SpaceBoardView(),

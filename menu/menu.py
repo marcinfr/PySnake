@@ -97,6 +97,10 @@ class Menu:
                 'theme': 0
             }
         if (self.currentMenu == 'multiplayer'):
+            self.gameSettings = {
+                'level': None,
+                'theme': None,
+            }
             Events.addEventListener("menu_multiplayer_joy_button_down", "joy_button_down", self.addJoystickPlayer)
         else:
             Events.removeEventListener("menu_multiplayer_joy_button_down")
