@@ -87,6 +87,8 @@ class ClassicBoardView:
             surface = self.getNormalFruitSruface()
         elif value == -2:
             surface = self.getFrozrenFruitSruface()
+        elif value == -3:
+            surface = self.getDarknessFruitSruface()
 
         if surface:
             offsetX = self.fieldSize - surface.get_width()
@@ -124,6 +126,27 @@ class ClassicBoardView:
         margin = surface.get_width() // 10
         
         pygame.draw.rect(surface, (51,255,255), (
+            margin,
+            margin,
+            surface.get_width() - margin * 2,
+            surface.get_height() - margin * 2,
+        ))
+        
+        return surface
+    
+    def getDarknessFruitSruface(self):
+        surface = pygame.Surface((self.fieldSize // 2, self.fieldSize // 2), pygame.SRCALPHA)
+
+        pygame.draw.rect(surface, (255,255,255), (
+            0,
+            0,
+            surface.get_width(),
+            surface.get_height(),
+        ))
+            
+        margin = surface.get_width() // 10
+        
+        pygame.draw.rect(surface, (0,0,0), (
             margin,
             margin,
             surface.get_width() - margin * 2,

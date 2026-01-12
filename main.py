@@ -10,6 +10,7 @@ class Main:
         self.events = Events()
         pygame.init()
         pygame.mixer.init()
+        pygame.mouse.set_visible(False)
         pygame.display.set_caption("Snake")
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         #self.screen = pygame.display.set_mode((1280, 800))
