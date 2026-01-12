@@ -37,6 +37,7 @@ class Main:
 
         font = pygame.font.SysFont(None, 24)
         clock = pygame.time.Clock()
+        fps_text = False
 
         while True:
             Events.reset()
@@ -58,7 +59,8 @@ class Main:
                 fps = clock.get_fps()
                 fps_text = font.render(f"FPS: {fps:.1f}", True, (255, 255, 255))
                 
-            self.screen.blit(fps_text, (self.screen.get_width() - 100, 10))
+            if fps_text:
+                self.screen.blit(fps_text, (self.screen.get_width() - 100, 10))
 
             pygame.display.flip()
 

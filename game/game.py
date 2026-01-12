@@ -129,7 +129,7 @@ class Game:
             self.aliveSnakes += 1
 
         self.addRandomFruit()
-        #self.addRandomFruit(-3)
+        self.addRandomFruit(-3)
         #self.addRandomFruit(-2)
 
     
@@ -195,72 +195,27 @@ class Game:
         posX = (self.screen.get_width() - self.gameSurface.get_width()) // 2
         self.screen.blit(self.gameSurface, (posX, self.pointsBarHeight))
 
-    @staticmethod
-    def getDarknessVisionMask(radius, softness):
-        mask = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
-
-        for i in range(softness):
-            alpha = int(255 * (i / softness))
-            pygame.draw.circle(
-                mask,
-                (0, 0, 0, alpha),
-                (radius, radius),
-                radius - i
-            )
-
-        return mask
 
     def displayDarkness(self):
         if self.darknessFactor == 0 and self.darkness == 0:
             return
         
-        if self.darknessFactor != 0 and Timer.has_elapsed('game.darkness', 0.1):
+        if self.darknessFactor != 0 and (self.darkness == 0 or Timer.has_elapsed('game.darkness', 0.1)):
             self.darkness += self.darknessFactor
 
         if self.darkness <= 0:
             self.darkness = 0
             self.darknessFactor = 0
+            Timer.remove('game.darkness.time')
         elif self.darkness >= 255:
             self.darkness = 255
             self.darknessFactor = 0
             if Timer.has_elapsed('game.darkness.time', 3):
+                sound = pygame.mixer.Sound("assets/darkness1.wav")
+                sound.play()
                 self.darknessFactor = -20
 
-        darkness = pygame.Surface(self.gameSurface.get_size(), pygame.SRCALPHA)
-        darkness.fill((0, 0, 0, self.darkness))
-
-        visionRadius = self.fieldSize * 4.5
-
-        if not hasattr(self, "vision_mask"):
-            self.vision_mask = self.getDarknessVisionMask(visionRadius, 60)
-
-        for snake in self.snakes:
-            head = snake.segments[0]
-
-            x = head['x'] * self.fieldSize + self.fieldSize // 2
-            y = head['y'] * self.fieldSize + self.fieldSize // 2
-
-            darkness.blit(
-                self.vision_mask,
-                (x - visionRadius, y - visionRadius),
-                special_flags=pygame.BLEND_RGBA_SUB
-            )
-
-        #for snake in self.snakes:
-        #    for i in range(SOFTNESS):
-        #        alpha = int(self.darkness * (i / SOFTNESS))
-        #        pygame.draw.circle(
-        #            darkness,
-        #            (0, 0, 0, self.darkness - alpha),
-        #            (
-        #                snake.segments[0]['x'] * self.fieldSize + self.fieldSize // 2, 
-        #                snake.segments[0]['y'] * self.fieldSize + self.fieldSize // 2
-        #            ),
-        #            VISION_RADIUS - i
-        #        )
-                
-
-        self.gameSurface.blit(darkness, (0,0))
+        self.boardView.displayDarkness(self.gameSurface, self.snakes, self.darkness)
 
     def displayCounter(self):
         if (self.counterToStart <= 0):
@@ -330,7 +285,7 @@ class Game:
                     s.freeze(5)
 
         if fruitType == -3:
-            sound = pygame.mixer.Sound("assets/darkness.wav")
+            sound = pygame.mixer.Sound("assets/darkness1.wav")
             self.darknessFactor = 20
 
         if sound:

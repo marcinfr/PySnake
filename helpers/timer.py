@@ -34,12 +34,18 @@ class Timer:
         Timer.timers[code] = Timer.get_timestamp()
 
     @staticmethod
+    def remove(code):
+        Timer.timers.pop(code, None)
+
+    @staticmethod
     def has_elapsed(code, seconds, reset_if_elapsed = True):
         elapsed_time = Timer.get_elapsed_time(code)
         if elapsed_time is not False and elapsed_time < seconds:
             return False
         if reset_if_elapsed:
             Timer.set_time(code)
+        if elapsed_time is False:
+            return False
         return True
 
     @staticmethod

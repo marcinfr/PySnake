@@ -66,3 +66,6 @@ class RetroBoardView(ClassicBoardView):
         ))
 
         return surface
+    
+    def displayDarkness(self, surface, snakes, darknessAlpha, color = (168, 176, 153)):
+        return ClassicBoardView.displayDarkness(self, surface, snakes, darknessAlpha, color)

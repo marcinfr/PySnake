@@ -154,3 +154,41 @@ class ClassicBoardView:
         ))
         
         return surface
+    
+    def displayDarkness(self, surface, snakes, darknessAlpha, color = (0,0,0)):
+        darkness = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
+        darkness.fill((*color, darknessAlpha))
+
+        visionRadius = self.fieldSize * 4.5
+
+        if not hasattr(self, "vision_mask"):
+            self.vision_mask = self.getDarknessVisionMask(visionRadius, 60)
+
+        for snake in snakes:
+            head = snake.segments[0]
+
+            x = head['x'] * self.fieldSize + self.fieldSize // 2
+            y = head['y'] * self.fieldSize + self.fieldSize // 2
+
+            darkness.blit(
+                self.vision_mask,
+                (x - visionRadius, y - visionRadius),
+                special_flags=pygame.BLEND_RGBA_SUB
+            )
+
+        surface.blit(darkness, (0,0))
+
+    @staticmethod
+    def getDarknessVisionMask(radius, softness):
+        mask = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
+
+        for i in range(softness):
+            alpha = int(255 * (i / softness))
+            pygame.draw.circle(
+                mask,
+                (0, 0, 0, alpha),
+                (radius, radius),
+                radius - i
+            )
+
+        return mask
