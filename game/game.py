@@ -1,5 +1,5 @@
 import pygame
-from game.levels import Levels
+from game.maps import Maps
 from game.themes import Themes
 from game.snake import Snake
 from game.controllers.keyboard import Keyboard
@@ -9,6 +9,7 @@ from collections import defaultdict
 from helpers.events import Events
 from helpers.timer import Timer
 import math
+from game.notifications import Notifications
 
 class Game:
     def __init__(self, screen):
@@ -52,11 +53,11 @@ class Game:
             return True
         return False
     
-    def getBoard(self, level):
-        width = level['mapSize'][0]
-        height = level['mapSize'][1]
+    def getBoard(self, map):
+        width = map['mapSize'][0]
+        height = map['mapSize'][1]
         board = [[0 for _ in range(height)] for _ in range(width)]
-        walls = self.level['walls']
+        walls = self.map['walls']
         for wall in walls:
             x1 = wall[0][0]
             y1 = wall[0][1]
@@ -82,20 +83,20 @@ class Game:
 
     
     def nextLevel(self):
-        self.level = Levels.getRandomLevel()
+        self.map = Maps.getRandomMap()
         themeId = self.settings['theme']
         if themeId == None:
             self.theme = Themes.getRandomTheme()
         else:
             self.theme = Themes.getTheme(themeId)
-        self.width = self.level['mapSize'][0]
-        self.height = self.level['mapSize'][1]
+        self.width = self.map['mapSize'][0]
+        self.height = self.map['mapSize'][1]
 
         pygame.mixer.stop()
         self.counterToStart = 3
         self.isRunning = True
         self.isEndGame = False
-        self.board = self.getBoard(self.level)
+        self.board = self.getBoard(self.map)
         self.fruits = defaultdict(dict)
         screenWidth, screenHeight = self.screen.get_size()
         maxWidth = screenWidth
@@ -111,11 +112,12 @@ class Game:
         self.boardView.init(self.gameSurface, self.fieldSize)
         self.snakeView = self.theme['snakeView']
         self.snakeView.init(self.gameSurface, self.fieldSize)
+        self.boardNotification = Notifications(self.gameSurface)
         self.darkness = 0
         self.darknessFactor = 0
 
-        snakeLength = self.level['snakeLenght']
-        startPositions = self.level['startPositions']
+        snakeLength = self.map['snakeLenght']
+        startPositions = self.map['startPositions']
 
         self.aliveSnakes = 0
         for snakeNumber, snake in enumerate(self.snakes):
@@ -129,7 +131,7 @@ class Game:
             self.aliveSnakes += 1
 
         self.addRandomFruit()
-        self.addRandomFruit(-3)
+        #self.addRandomFruit(-3)
         #self.addRandomFruit(-2)
 
     
@@ -169,6 +171,8 @@ class Game:
                     self.addRandomFruit(-2)
                 if random.randint(0, 10) == 0:
                     self.addRandomFruit(-3)
+        self.prcessDarkness()
+        self.boardNotification.process()
 
 
     def stop(self):
@@ -188,15 +192,16 @@ class Game:
         for snake in self.snakes:
             self.snakeView.display(snake)
 
-        self.displayDarkness()
+        self.boardView.displayDarkness(self.gameSurface, self.snakes, self.darkness)
 
         self.displayCounter()
         self.displayPoints()
         posX = (self.screen.get_width() - self.gameSurface.get_width()) // 2
+        self.boardNotification.display()
         self.screen.blit(self.gameSurface, (posX, self.pointsBarHeight))
 
 
-    def displayDarkness(self):
+    def prcessDarkness(self):
         if self.darknessFactor == 0 and self.darkness == 0:
             return
         
@@ -215,7 +220,7 @@ class Game:
                 sound.play()
                 self.darknessFactor = -20
 
-        self.boardView.displayDarkness(self.gameSurface, self.snakes, self.darkness)
+        
 
     def displayCounter(self):
         if (self.counterToStart <= 0):
@@ -273,20 +278,38 @@ class Game:
         head_y = snake.segments[0]['y']
         fruitType = self.fruits[head_x][head_y]
         sound = False
+
+        points = 0
+        notification = False
+        font = pygame.font.SysFont(None, self.fieldSize * 2 // 3)
         
         if fruitType == -1:
-            snake.totalPoints += 1
+            points = 1
             sound = pygame.mixer.Sound("assets/pick1.wav")
+            notification = font.render("+" + str(points), True, (255, 255, 255))
+
 
         if fruitType == -2:
             sound = pygame.mixer.Sound("assets/freezing1.mp3")
+            notification = font.render("Stop!!!", True, (51,255,255))
             for s in self.snakes:
                 if s.id != snake.id:
                     s.freeze(5)
 
         if fruitType == -3:
+            notification = font.render("Ciemność", True, (0, 0, 0))
             sound = pygame.mixer.Sound("assets/darkness1.wav")
             self.darknessFactor = 20
+
+
+        if (notification):
+            self.boardNotification.addNotification(
+                (head_x * self.fieldSize + self.fieldSize // 2,head_y * self.fieldSize), 
+                notification, 
+                1
+            )
+
+        snake.totalPoints += points
 
         if sound:
             sound.play()

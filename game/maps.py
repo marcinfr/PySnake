@@ -1,7 +1,7 @@
 from random import randrange
 
-class Levels:
-    LEVELS = [
+class Maps:
+    MAPS = [
         {
             'mapSize': (32, 18),
             'snakeLenght': 3,
@@ -102,10 +102,10 @@ class Levels:
     ]
 
     @staticmethod
-    def getLevel(levelNumber):
-        return Levels.LEVELS[levelNumber]
+    def getMap(mapNumber):
+        return Maps.MAPS[mapNumber]
     
     @staticmethod
-    def getRandomLevel():
-        levelNumber = randrange(0, len(Levels.LEVELS))
-        return Levels.getLevel(levelNumber)
+    def getRandomMap():
+        mapNumber = randrange(0, len(Maps.MAPS))
+        return Maps.getMap(mapNumber)

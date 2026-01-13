@@ -165,16 +165,17 @@ class ClassicBoardView:
             self.vision_mask = self.getDarknessVisionMask(visionRadius, 60)
 
         for snake in snakes:
-            head = snake.segments[0]
+            if snake.life > 0:
+                head = snake.segments[0]
 
-            x = head['x'] * self.fieldSize + self.fieldSize // 2
-            y = head['y'] * self.fieldSize + self.fieldSize // 2
+                x = head['x'] * self.fieldSize + self.fieldSize // 2
+                y = head['y'] * self.fieldSize + self.fieldSize // 2
 
-            darkness.blit(
-                self.vision_mask,
-                (x - visionRadius, y - visionRadius),
-                special_flags=pygame.BLEND_RGBA_SUB
-            )
+                darkness.blit(
+                    self.vision_mask,
+                    (x - visionRadius, y - visionRadius),
+                    special_flags=pygame.BLEND_RGBA_SUB
+                )
 
         surface.blit(darkness, (0,0))
 
