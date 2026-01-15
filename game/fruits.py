@@ -1,0 +1,4 @@
+class Fruits:
+    FRUIT_TYPE_NORMAL = 1
+    FRUIT_TYPE_FROZEN = 2
+    FRUIT_TYPE_DARKNESS = 3

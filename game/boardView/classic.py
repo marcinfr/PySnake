@@ -1,4 +1,6 @@
 import pygame
+from game.fruits import Fruits
+import math
 
 class ClassicBoardView:
 
@@ -55,8 +57,8 @@ class ClassicBoardView:
         pygame.draw.rect(surface, color, (
             x * self.fieldSize,
             y * self.fieldSize,
-            self.fieldSize,
-            self.fieldSize,
+            math.ceil(self.fieldSize),
+            math.ceil(self.fieldSize),
         ))
 
     def drawWall(self, surface, x, y):
@@ -83,11 +85,11 @@ class ClassicBoardView:
 
     def drawFruit(self, value, x, y):
         surface = False
-        if value == -1:
+        if value == Fruits.FRUIT_TYPE_NORMAL:
             surface = self.getNormalFruitSruface()
-        elif value == -2:
+        elif value == Fruits.FRUIT_TYPE_FROZEN:
             surface = self.getFrozrenFruitSruface()
-        elif value == -3:
+        elif value == Fruits.FRUIT_TYPE_DARKNESS:
             surface = self.getDarknessFruitSruface()
 
         if surface:
@@ -168,8 +170,8 @@ class ClassicBoardView:
             if snake.life > 0:
                 head = snake.segments[0]
 
-                x = head['x'] * self.fieldSize + self.fieldSize // 2
-                y = head['y'] * self.fieldSize + self.fieldSize // 2
+                x = math.ceil(head['x'] * self.fieldSize) + self.fieldSize // 2
+                y = math.ceil(head['y'] * self.fieldSize) + self.fieldSize // 2
 
                 darkness.blit(
                     self.vision_mask,

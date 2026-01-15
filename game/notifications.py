@@ -27,7 +27,7 @@ class Notifications:
             elapsed = Timer.get_elapsed_time("notifications") - n['added_at']
             alpha = 255 - (255 / n['time']) * elapsed
             pos = n['pos']
-            pos = (pos[0], pos[1] - round((255 / text.get_height()) * elapsed))
+            pos = (pos[0], pos[1] - round(text.get_height() * elapsed))
             
             text.set_alpha(alpha)
             self.screen.blit(text, pos)

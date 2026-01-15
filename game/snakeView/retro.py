@@ -1,6 +1,7 @@
 from game.snakeView.default import DefaultSnakeView
 import pygame
 from helpers.timer import Timer
+import math
 
 class RetroSnakeView(DefaultSnakeView):
 
@@ -49,30 +50,31 @@ class RetroSnakeView(DefaultSnakeView):
         return self.getStraightSegment(snake, segmentNumber)
     
     def getRetroSegment(self, color):
-        surface = pygame.Surface((self.fieldSize, self.fieldSize), pygame.SRCALPHA)
+        fieldSize = math.ceil(self.fieldSize)
+        surface = pygame.Surface((fieldSize, fieldSize), pygame.SRCALPHA)
 
         margin = self.fieldSize // 4
         pygame.draw.rect(surface, color, (
             margin,
             margin,
-            self.fieldSize - margin * 2,
-            self.fieldSize - margin * 2,
+            fieldSize - margin * 2,
+            fieldSize - margin * 2,
         ))
 
-        lineSize = self.fieldSize // 5
+        lineSize = fieldSize // 5
         pygame.draw.line(
             surface, 
             color,
             (0, 0),
-            (0, self.fieldSize),
+            (0, fieldSize),
             lineSize
         )
 
         pygame.draw.line(
             surface, 
             color,
-            (self.fieldSize, 0),
-            (self.fieldSize, self.fieldSize),
+            (fieldSize, 0),
+            (fieldSize, fieldSize),
             lineSize
         )
 
@@ -80,15 +82,15 @@ class RetroSnakeView(DefaultSnakeView):
             surface, 
             color,
             (0, 0),
-            (self.fieldSize, 0),
+            (fieldSize, 0),
             lineSize
         )
 
         pygame.draw.line(
             surface, 
             color,
-            (0, self.fieldSize),
-            (self.fieldSize, self.fieldSize),
+            (0, fieldSize),
+            (fieldSize, fieldSize),
             lineSize
         )
     

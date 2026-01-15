@@ -1,5 +1,6 @@
 import pygame
 import random
+import math
 
 class DefaultSnakeView:
 
@@ -94,27 +95,28 @@ class DefaultSnakeView:
     def getStraightSegment(self, snake, segmentNumber):
         cacheId = 'straight-' + str(snake.id)
         if cacheId not in self.cachedSegemnts:
-            surface = pygame.Surface((self.fieldSize, self.fieldSize))
+            fieldSize = math.ceil(self.fieldSize)
+            surface = pygame.Surface((fieldSize, fieldSize))
 
             pygame.draw.rect(surface, self.getSnakeColor(snake, 0.8), (
                 0,
                 0,
-                self.fieldSize,
-                self.fieldSize,
+                fieldSize,
+                fieldSize,
             ))
 
             pygame.draw.rect(surface, self.getSnakeColor(snake, 0.9), (
                 0,
-                self.fieldSize * 0.05,
-                self.fieldSize,
-                self.fieldSize - self.fieldSize * 0.1,
+                fieldSize * 0.05,
+                fieldSize,
+                fieldSize - fieldSize * 0.1,
             ))
 
             pygame.draw.rect(surface, self.getSnakeColor(snake), (
                 0,
-                self.fieldSize * 0.2,
-                self.fieldSize,
-                self.fieldSize - self.fieldSize * 0.4,
+                fieldSize * 0.2,
+                fieldSize,
+                fieldSize - fieldSize * 0.4,
             ))
 
             self.cachedSegemnts[cacheId] = surface
@@ -123,78 +125,79 @@ class DefaultSnakeView:
     def getCornerSegment(self, snake, segmentNumber):
         cacheId = 'corner-' + str(snake.id)
         if cacheId not in self.cachedSegemnts:
-            surface = pygame.Surface((self.fieldSize, self.fieldSize), pygame.SRCALPHA)
+            fieldSize = math.ceil(self.fieldSize)
+            surface = pygame.Surface((fieldSize, fieldSize), pygame.SRCALPHA)
 
             pygame.draw.circle(
                 surface,
                 self.getSnakeColor(snake, 0.8),
                 (
-                    self.fieldSize / 2,
-                    self.fieldSize / 2
+                    fieldSize / 2,
+                    fieldSize / 2
                 ),
-                self.fieldSize / 2
+                fieldSize / 2
             )
 
             pygame.draw.circle(
                 surface,
                 self.getSnakeColor(snake, 0.9),
                 (
-                    self.fieldSize / 2,
-                    self.fieldSize / 2
+                    fieldSize / 2,
+                    fieldSize / 2
                 ),
-                self.fieldSize / 2 - self.fieldSize * 0.05
+                fieldSize / 2 - fieldSize * 0.05
             )
 
             pygame.draw.circle(
                 surface,
                 self.getSnakeColor(snake),
                 (
-                    self.fieldSize / 2,
-                    self.fieldSize / 2
+                    fieldSize / 2,
+                    fieldSize / 2
                 ),
-                self.fieldSize / 2 - self.fieldSize * 0.2
+                fieldSize / 2 - fieldSize * 0.2
             )
 
             pygame.draw.rect(surface, self.getSnakeColor(snake, 0.8), (
                 0,
                 0,
-                self.fieldSize * 0.5,
-                self.fieldSize,
+                fieldSize * 0.5,
+                fieldSize,
             ))
 
             pygame.draw.rect(surface, self.getSnakeColor(snake, 0.8), (
                 0,
-                self.fieldSize * 0.5,
-                self.fieldSize,
-                self.fieldSize,
+                fieldSize * 0.5,
+                fieldSize,
+                fieldSize,
             ))
 
             pygame.draw.rect(surface, self.getSnakeColor(snake, 0.9), (
                 0,
-                self.fieldSize * 0.05,
-                self.fieldSize * 0.5,
-                self.fieldSize - self.fieldSize * 0.1,
+                fieldSize * 0.05,
+                fieldSize * 0.5,
+                fieldSize - fieldSize * 0.1,
             ))
 
             pygame.draw.rect(surface, self.getSnakeColor(snake, 0.9), (
-                self.fieldSize * 0.05,
-                self.fieldSize * 0.5,
-                self.fieldSize - self.fieldSize * 0.1,
-                self.fieldSize,
+                fieldSize * 0.05,
+                fieldSize * 0.5,
+                fieldSize - fieldSize * 0.1,
+                fieldSize,
             ))
 
             pygame.draw.rect(surface, self.getSnakeColor(snake), (
                 0,
-                self.fieldSize * 0.2,
-                self.fieldSize * 0.5,
-                self.fieldSize - self.fieldSize * 0.4,
+                fieldSize * 0.2,
+                fieldSize * 0.5,
+                fieldSize - fieldSize * 0.4,
             ))
 
             pygame.draw.rect(surface, self.getSnakeColor(snake), (
-                self.fieldSize * 0.2,
-                self.fieldSize * 0.5,
-                self.fieldSize - self.fieldSize * 0.4,
-                self.fieldSize,
+                fieldSize * 0.2,
+                fieldSize * 0.5,
+                fieldSize - fieldSize * 0.4,
+                fieldSize,
             ))
             
             self.cachedSegemnts[cacheId] = surface
@@ -209,32 +212,33 @@ class DefaultSnakeView:
         cacheId = 'frozen-' + str((segmentNumber + snake.id) % 10)
 
         if cacheId not in self.cachedSegemnts:
-            surface = pygame.Surface((self.fieldSize, self.fieldSize))
+            fieldSize = math.ceil(self.fieldSize)
+            surface = pygame.Surface((fieldSize, fieldSize))
             pygame.draw.rect(surface, (255,255,255), (
                     0,
                     0,
-                    self.fieldSize,
-                    self.fieldSize,
+                    fieldSize,
+                    fieldSize,
                 ))
             
             pygame.draw.rect(surface, (51,255,255), (
-                    0 + self.fieldSize // 20,
-                    0 + self.fieldSize // 20,
-                    self.fieldSize - self.fieldSize // 20 * 2,
-                    self.fieldSize - self.fieldSize // 20 * 2,
+                    0 + fieldSize // 20,
+                    0 + fieldSize // 20,
+                    fieldSize - fieldSize // 20 * 2,
+                    fieldSize - fieldSize // 20 * 2,
                 ))
 
             for i in range(15):
                 w1, w2 = random.sample(range(4), 2)
 
-                p1 = self.randomWallPoint(self.fieldSize, w1)
-                p2 = self.randomWallPoint(self.fieldSize, w2)
+                p1 = self.randomWallPoint(fieldSize, w1)
+                p2 = self.randomWallPoint(fieldSize, w2)
 
                 pygame.draw.line(surface, 
                     "white", 
                     p1,
                     p2,
-                    self.fieldSize // (20 * random.randint(1,3))
+                    fieldSize // (20 * random.randint(1,3))
                 )
 
             self.cachedSegemnts[cacheId] = surface

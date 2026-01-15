@@ -3,6 +3,8 @@ from helpers.events import Events
 import math
 from game.snake import Snake
 from game.themes import Themes
+from game.levels.single import SingleLevel
+from game.levels.mutiplayer import MultiplayerLevel
 
 class Menu:
     def __init__(self, screen, main):
@@ -93,12 +95,12 @@ class Menu:
         if (self.currentMenu == 'main'):
             self.players = {}
             self.gameSettings = {
-                'level': None,
+                'level_provider': SingleLevel(),
                 'theme': 0
             }
         if (self.currentMenu == 'multiplayer'):
             self.gameSettings = {
-                'level': None,
+                'level_provider': MultiplayerLevel(),
                 'theme': None,
             }
             Events.addEventListener("menu_multiplayer_joy_button_down", "joy_button_down", self.addJoystickPlayer)

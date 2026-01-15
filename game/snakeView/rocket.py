@@ -33,23 +33,24 @@ class RocketSnakeView(DefaultSnakeView):
         return self.cachedSegemnts[cacheId]
     
     def getStraightSegment(self, snake, segmentNumber):
+        fieldSize = math.ceil(self.fieldSize)
         alpha = self.alpha - 20 * 4 // min((max(len(snake.segments) - segmentNumber, 1), 4))
-        surface = pygame.Surface((self.fieldSize, self.fieldSize), pygame.SRCALPHA)
+        surface = pygame.Surface((fieldSize, fieldSize), pygame.SRCALPHA)
 
         pygame.draw.line(
             surface, 
             self.getSnakeColor(snake, 0.5, alpha),
-            (0, self.fieldSize // 2),
-            (self.fieldSize, self.fieldSize // 2),
-            self.fieldSize // 2
+            (0, fieldSize // 2),
+            (fieldSize, fieldSize // 2),
+            fieldSize // 2
         )
 
         pygame.draw.line(
             surface, 
             self.getSnakeColor(snake, 1.2 , alpha), 
-            (0, self.fieldSize // 2),
-            (self.fieldSize, self.fieldSize // 2),
-            self.fieldSize // 10
+            (0, fieldSize // 2),
+            (fieldSize, fieldSize // 2),
+            fieldSize // 10
 )
         return surface
     
