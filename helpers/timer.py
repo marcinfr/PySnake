@@ -19,7 +19,7 @@ class Timer:
     def tick():
         if Timer.is_paused:
             Timer.is_paused = False
-            paused_time = Timer.get_timestamp() - Timer.paused_on
+            paused_time = Timer.get_paused_time()
             for code in Timer.timers.keys():
                 Timer.timers[code] += paused_time
 
@@ -32,10 +32,6 @@ class Timer:
     @staticmethod
     def set_time(code):
         Timer.timers[code] = Timer.get_timestamp()
-
-    @staticmethod
-    def remove(code):
-        Timer.timers.pop(code, None)
 
     @staticmethod
     def has_elapsed(code, seconds, reset_if_elapsed = True):
@@ -53,4 +49,14 @@ class Timer:
         time = Timer.timers.get(code)
         if not time:
             return False
+        if Timer.is_paused:
+            time += Timer.get_paused_time()
         return Timer.get_timestamp() - time
+    
+    @staticmethod
+    def get_paused_time():
+        return Timer.get_timestamp() - Timer.paused_on
+
+    @staticmethod
+    def remove(code):
+        Timer.timers.pop(code, None)

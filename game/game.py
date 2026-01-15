@@ -142,6 +142,7 @@ class Game:
         self.snakes.append(snake)
 
     def update(self):
+        Timer.tick()
         isAliveSnake = False
         if self.counterToStart > 0:
             if Timer().has_elapsed("game-start-counter", 0.1):
@@ -166,7 +167,7 @@ class Game:
                 #self.start(self.players)
                 self.stop()
 
-            if self.isRunning and Timer().has_elapsed("spacial-fruit", 2):
+            if Timer().has_elapsed("spacial-fruit", 2):
                 if random.randint(0, 10) == 0:
                     self.addRandomFruit(-2)
                 if random.randint(0, 10) == 0:
@@ -180,6 +181,7 @@ class Game:
         self.isEndGame = True
 
     def pause(self):
+        Timer.pause()
         self.isRunning = False
 
     def unPause(self):
@@ -281,7 +283,7 @@ class Game:
 
         points = 0
         notification = False
-        font = pygame.font.SysFont(None, self.fieldSize * 2 // 3)
+        font = pygame.font.SysFont(None, self.fieldSize)
         
         if fruitType == -1:
             points = 1
