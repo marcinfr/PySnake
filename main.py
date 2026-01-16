@@ -46,7 +46,8 @@ class Main:
 
             clock.tick(1000)
             
-            if (self.game.isRunning):
+            if (not self.game.isPaused):
+                #if self.game.isRunning:
                 self.game.update()
                 self.game.display()
             else:

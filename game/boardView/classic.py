@@ -2,6 +2,8 @@ import pygame
 from game.fruits import Fruits
 import math
 
+from helpers.timer import Timer
+
 class ClassicBoardView:
 
     COLOR_LIGHT = (170, 215, 81)
@@ -46,8 +48,8 @@ class ClassicBoardView:
 
     def displayFruits(self, fruits):
         for x, inner in fruits.items():
-            for y, value in inner.items():
-                self.drawFruit(value, x, y)
+            for y, data in inner.items():
+                self.drawFruit(data, x, y)
 
     def drawField(self, surface, x, y):
         if x % 2 == y % 2:
@@ -83,14 +85,18 @@ class ClassicBoardView:
             self.fieldSize - self.fieldSize * 0.2 * 2,
         ))
 
-    def drawFruit(self, value, x, y):
+    def drawFruit(self, fruitData, x, y):
+        type = fruitData['type']
         surface = False
-        if value == Fruits.FRUIT_TYPE_NORMAL:
-            surface = self.getNormalFruitSruface()
-        elif value == Fruits.FRUIT_TYPE_FROZEN:
-            surface = self.getFrozrenFruitSruface()
-        elif value == Fruits.FRUIT_TYPE_DARKNESS:
+        if type == Fruits.FRUIT_TYPE_NORMAL:
+            surface = self.getNormalFruitSruface(fruitData)
+        elif type == Fruits.FRUIT_TYPE_FROZEN:
+            surface = self.getFrozenFruitSruface()
+        elif type == Fruits.FRUIT_TYPE_DARKNESS:
             surface = self.getDarknessFruitSruface()
+
+        if 'lifeTime' in fruitData:
+            surface = self.getSurfaceWithLifetime(surface, fruitData)
 
         if surface:
             offsetX = self.fieldSize - surface.get_width()
@@ -100,7 +106,7 @@ class ClassicBoardView:
                 (self.fieldSize * x + offsetX // 2, self.fieldSize * y + offsetY // 2)
             )
     
-    def getNormalFruitSruface(self):
+    def getNormalFruitSruface(self, fruitData):
         surface = pygame.Surface((self.fieldSize, self.fieldSize), pygame.SRCALPHA)
         color = (255, 0, 0)
 
@@ -109,13 +115,49 @@ class ClassicBoardView:
             color,
             (
                 surface.get_width() // 2,
-                 surface.get_height() // 2
+                surface.get_height() // 2
             ),
             self.fieldSize // 4
         )
+
+        return surface
+    
+    def getSurfaceWithLifetime(self, surface, fruitData):
+        elapsed = Timer.get_timestamp() - fruitData['createTime']
+        lifeTime = fruitData['lifeTime']
+        visibleParts = 4 - (elapsed / lifeTime * 4) // 1
+
+        if visibleParts < 4:
+            mask = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
+            pygame.draw.rect(mask, (0, 0, 0, 220), (
+                surface.get_width() // 2,
+                0,
+                surface.get_width() // 2,
+                surface.get_height() // 2
+            ))
+            if visibleParts < 3:
+                pygame.draw.rect(mask, (0, 0, 0, 220), (
+                    surface.get_width() // 2,
+                    surface.get_height() // 2,
+                    self.fieldSize // 2,
+                    self.fieldSize // 2
+                ))
+            if visibleParts < 2:
+                pygame.draw.rect(mask, (0, 0, 0, 220), (
+                    0,
+                    surface.get_height() // 2,
+                    self.fieldSize // 2,
+                    self.fieldSize // 2
+                ))
+
+            surface.blit(
+                mask,
+                    (0, 0),
+                    special_flags=pygame.BLEND_RGBA_SUB
+                )
         return surface
 
-    def getFrozrenFruitSruface(self):
+    def getFrozenFruitSruface(self):
         surface = pygame.Surface((self.fieldSize // 2, self.fieldSize // 2), pygame.SRCALPHA)
 
         pygame.draw.rect(surface, (255,255,255), (
@@ -156,7 +198,7 @@ class ClassicBoardView:
         ))
         
         return surface
-    
+ 
     def displayDarkness(self, surface, snakes, darknessAlpha, color = (0,0,0)):
         darkness = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
         darkness.fill((*color, darknessAlpha))

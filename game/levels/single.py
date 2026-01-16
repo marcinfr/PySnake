@@ -7,7 +7,7 @@ class SingleLevel:
         self.displayLevel = True
 
     def initLevel(self, game):
-        self.pointsToWin = 20
+        self.pointsToWin = 10
         snake = self.getSnake(game)
         snake.totalPoints = 0
         game.map = Maps.getMap((game.currentLevel -1) % len(Maps.MAPS))

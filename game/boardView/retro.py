@@ -43,7 +43,7 @@ class RetroBoardView(ClassicBoardView):
             self.fieldSize - self.fieldSize // 5,
         ))
 
-    def getNormalFruitSruface(self):
+    def getNormalFruitSruface(self, fruitData):
         surface = pygame.Surface((self.fieldSize, self.fieldSize), pygame.SRCALPHA)
         friutColor = (170, 34, 17)
 

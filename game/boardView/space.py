@@ -54,7 +54,7 @@ class SpaceBoardView(ClassicBoardView):
             self.stars.append(([x, y], 1))
 
 
-    def getNormalFruitSruface(self):
+    def getNormalFruitSruface(self, fruitData):
         surface = pygame.Surface((self.fieldSize, self.fieldSize), pygame.SRCALPHA)
         cx = self.fieldSize // 2
         cy = self.fieldSize // 2
