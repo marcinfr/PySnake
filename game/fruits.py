@@ -7,6 +7,7 @@ class Fruits:
     FRUIT_TYPE_NORMAL = 1
     FRUIT_TYPE_FROZEN = 2
     FRUIT_TYPE_DARKNESS = 3
+    FRUIT_TYPE_WALL = 4
 
     @staticmethod
     def processFruits(game):
@@ -30,13 +31,24 @@ class Fruits:
         if 'lifeTime' in data:
             fruitData['lifeTime'] = data['lifeTime']  # seconds
             fruitData['createTime'] = Timer.get_timestamp()
+
+        if type == Fruits.FRUIT_TYPE_WALL:
+            fruitData['wall'] = [(-1,0),(0,0),(1,0),(0,-1),(0,1)]
+
         return fruitData
 
     @staticmethod
-    def onRemove(game, fruitData):
+    def onRemove(game, x, y, fruitData):
         type = fruitData['type']
+        if type == Fruits.FRUIT_TYPE_WALL:
+            for wall in fruitData['wall']:
+                x1 = x + wall[0]
+                y1 = y + wall[1]
+                if 0 <= x1 < len(game.board) and 0 <= y1 < len(game.board[0]):
+                    if game.board[x1][y1] == 0:
+                        game.addWall(x1, y1)
         if type == Fruits.FRUIT_TYPE_NORMAL:
-            if random.randint(0, 5) == 0:
+            if random.randint(0, 2) == 0:
                 game.addRandomFruit(Fruits.FRUIT_TYPE_NORMAL, {'lifeTime': 4})
             else:
                 game.addRandomFruit(Fruits.FRUIT_TYPE_NORMAL)
@@ -68,6 +80,8 @@ class Fruits:
             notification = font.render("Ciemność", True, (0, 0, 0))
             sound = pygame.mixer.Sound("assets/darkness1.wav")
             game.darknessFactor = 20
+
+        game.fruits[head_x][head_y]['wall'] = []
 
 
         if (notification):

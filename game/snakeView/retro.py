@@ -36,7 +36,7 @@ class RetroSnakeView(DefaultSnakeView):
     def getFrozenElement(self, snake, segmentNumber, segment):
         cacheId = 'frozen-' + str(snake.id)
         if cacheId not in self.cachedSegemnts:
-            self.cachedSegemnts[cacheId] = self.getRetroSegment((156, 163, 142))
+            self.cachedSegemnts[cacheId] = self.getRetroSegment((0, 0, 0))
         return self.cachedSegemnts[cacheId]
 
     

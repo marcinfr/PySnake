@@ -9,40 +9,45 @@ class ClassicBoardView:
     COLOR_LIGHT = (170, 215, 81)
     COLOR_DARK = (162, 209, 73)
 
-    def init(self, screen, fieldSize):
-        self.screen = screen
-        self.fieldSize = fieldSize
+    def init(self, game):
+        self.game = game
+        self.screen = game.gameSurface
+        self.fieldSize = game.fieldSize
         self.background = None
         self.topLayer = None
 
-    def display(self, board):
-        self.screen.blit(self.getBackground(board), (0, 0))
-        self.screen.blit(self.getTopLayer(board), (0, 0))
+    def display(self):
+        self.screen.blit(self.getBackground(), (0, 0))
+        self.screen.blit(self.getTopLayer(), (0, 0))
 
-    def getBackground(self, board):
+    def getBackground(self):
         if (self.background is None):
-            width = len(board)
-            height = len(board[0])
+            width = len(self.game.board)
+            height = len(self.game.board[0])
             self.background = pygame.Surface((self.fieldSize * width, self.fieldSize * height))
-            self.drawBackground(board)
+            self.drawBackground()
         return self.background
     
-    def getTopLayer(self, board):
+    def getTopLayer(self):
         if (self.topLayer is None):
-            width = len(board)
-            height = len(board[0])
+            width = len(self.game.board)
+            height = len(self.game.board[0])
             self.topLayer = pygame.Surface((self.fieldSize * width, self.fieldSize * height), pygame.SRCALPHA)
-            self.drawTopLayer(board)
+            self.drawTopLayer(self.game.board)
         return self.topLayer
     
     def drawTopLayer(self, board):
         for x, row in enumerate(board):
             for y, value in enumerate(row):
                 if (value == 2):
-                    self.drawWall(self.topLayer, x, y)
+                    self.addWall(x, y)
 
-    def drawBackground(self, board):
-        for x, row in enumerate(board):
+    def addWall(self, x, y):
+        if self.topLayer:
+            self.drawWall(self.topLayer, x, y)
+
+    def drawBackground(self):
+        for x, row in enumerate(self.game.board):
                 for y, value in enumerate(row):
                     self.drawField(self.background, x, y)
 
@@ -89,11 +94,14 @@ class ClassicBoardView:
         type = fruitData['type']
         surface = False
         if type == Fruits.FRUIT_TYPE_NORMAL:
-            surface = self.getNormalFruitSruface(fruitData)
+            surface = self.getNormalFruitSruface()
         elif type == Fruits.FRUIT_TYPE_FROZEN:
             surface = self.getFrozenFruitSruface()
         elif type == Fruits.FRUIT_TYPE_DARKNESS:
             surface = self.getDarknessFruitSruface()
+        elif type == Fruits.FRUIT_TYPE_WALL:
+            surface = self.getWallFruitSruface()
+            self.drawAroundWallFruit(fruitData, x, y)
 
         if 'lifeTime' in fruitData:
             surface = self.getSurfaceWithLifetime(surface, fruitData)
@@ -106,7 +114,28 @@ class ClassicBoardView:
                 (self.fieldSize * x + offsetX // 2, self.fieldSize * y + offsetY // 2)
             )
     
-    def getNormalFruitSruface(self, fruitData):
+    def drawAroundWallFruit(self, fruitData, x, y):
+        surface = pygame.Surface((self.fieldSize, self.fieldSize), pygame.SRCALPHA)
+        elapsed = Timer.get_timestamp() - fruitData['createTime']
+
+        alpha_dt = 1 - abs((elapsed % 4) - 2)
+        alpha = alpha_dt * 10 + 20
+
+        surface.set_alpha(alpha)
+        self.drawWall(surface, 0, 0)
+
+        for wall in fruitData['wall']:
+            x1 = x + wall[0]
+            y1 = y + wall[1]
+            if 0 <= x1 < len(self.game.board) and 0 <= y1 < len(self.game.board[0]):
+                if self.game.board[x1][y1] == 0:
+                    self.screen.blit(
+                        surface, 
+                        (self.fieldSize * x1, self.fieldSize * y1)
+                    )
+
+
+    def getNormalFruitSruface(self):
         surface = pygame.Surface((self.fieldSize, self.fieldSize), pygame.SRCALPHA)
         color = (255, 0, 0)
 
@@ -122,10 +151,21 @@ class ClassicBoardView:
 
         return surface
     
+    def getWallFruitSruface(self):
+        surface = pygame.Surface((self.fieldSize, self.fieldSize), pygame.SRCALPHA)
+        wallSurface = pygame.Surface((self.fieldSize, self.fieldSize), pygame.SRCALPHA)
+        self.drawWall(wallSurface, 0, 0)
+        wallSurface = pygame.transform.scale(wallSurface, (self.fieldSize // 2, self.fieldSize // 2))
+        surface.blit(wallSurface, (surface.get_width() // 2 - wallSurface.get_width() // 2, surface.get_height() // 2 - wallSurface.get_height() // 2))
+        return surface
+
     def getSurfaceWithLifetime(self, surface, fruitData):
         elapsed = Timer.get_timestamp() - fruitData['createTime']
         lifeTime = fruitData['lifeTime']
         visibleParts = 4 - (elapsed / lifeTime * 4) // 1
+
+        if fruitData['type'] == Fruits.FRUIT_TYPE_WALL:
+            visibleParts = 4 - visibleParts  + 1
 
         if visibleParts < 4:
             mask = pygame.Surface(surface.get_size(), pygame.SRCALPHA)

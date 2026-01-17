@@ -109,7 +109,7 @@ class Game:
         print("Game initialized with board size:", surfaceWidth, "x", surfaceHeight)
         self.gameSurface = pygame.Surface((surfaceWidth, surfaceHeight))
         self.boardView = self.theme['boardView']
-        self.boardView.init(self.gameSurface, self.fieldSize)
+        self.boardView.init(self)
         self.snakeView = self.theme['snakeView']
         self.snakeView.init(self.gameSurface, self.fieldSize)
         self.boardNotification = Notifications(self.gameSurface)
@@ -133,6 +133,7 @@ class Game:
         self.addRandomFruit()
         #self.addRandomFruit(Fruits.FRUIT_TYPE_FROZEN)
         #self.addRandomFruit(Fruits.FRUIT_TYPE_NORMAL, {'lifeTime': 4})
+        #self.addRandomFruit(Fruits.FRUIT_TYPE_WALL,  {'lifeTime': 4})
 
     
     def addSnake(self, controller, color):
@@ -168,10 +169,12 @@ class Game:
                     print("next level")
             
             if Timer().has_elapsed("spacial-fruit", 2):
-                if random.randint(0, 10) == 0:
+                if random.randint(0, 15) == 0:
                     self.addRandomFruit(Fruits.FRUIT_TYPE_FROZEN)
-                if random.randint(0, 10) == 0:
+                if random.randint(0, 15) == 0:
                     self.addRandomFruit(Fruits.FRUIT_TYPE_DARKNESS)
+                if random.randint(0, 5) == 0:
+                    self.addRandomFruit(Fruits.FRUIT_TYPE_WALL, {'lifeTime': 15})
         Fruits.processFruits(self)
         self.processRemovedFruits()
         self.prcessDarkness()
@@ -194,7 +197,7 @@ class Game:
 
     def display(self):
         self.screen.fill((0, 0, 0))
-        self.boardView.display(self.board)
+        self.boardView.display()
         self.boardView.displayFruits(self.fruits)
         for snake in self.snakes:
             self.snakeView.display(snake)
@@ -306,7 +309,7 @@ class Game:
 
     def processRemovedFruits(self):
         for x, y in self.fruitsToRmove:
-            Fruits.onRemove(self, self.fruits[x][y])
+            Fruits.onRemove(self, x, y, self.fruits[x][y])
             del self.fruits[x][y]
             self.board[x][y] = 0
         self.fruitsToRmove = []
@@ -320,3 +323,7 @@ class Game:
         head_y = snake.segments[0]['y']
         fruitType = self.fruits[head_x][head_y]
         Fruits.onPick(self, snake, fruitType)
+
+    def addWall(self, x, y):
+        self.board[x][y] = 1
+        self.boardView.addWall(x, y)

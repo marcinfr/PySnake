@@ -17,8 +17,8 @@ class SpaceBoardView(ClassicBoardView):
             self.fieldSize,
         ))
 
-    def getBackground(self, board):
-        ClassicBoardView.getBackground(self, board)
+    def getBackground(self):
+        ClassicBoardView.getBackground(self)
         move = False
         if Timer().has_elapsed("stars", 0.02):
             move = True
@@ -42,8 +42,8 @@ class SpaceBoardView(ClassicBoardView):
                     star[0][0] = self.background.get_width()
         return self.background
     
-    def drawBackground(self, board):
-        ClassicBoardView.drawBackground(self, board)
+    def drawBackground(self):
+        ClassicBoardView.drawBackground(self)
         self.stars = []
         for i in range(self.background.get_width() * self.background.get_height() // 100000):
             x = randrange(0, self.background.get_width())
@@ -54,7 +54,7 @@ class SpaceBoardView(ClassicBoardView):
             self.stars.append(([x, y], 1))
 
 
-    def getNormalFruitSruface(self, fruitData):
+    def getNormalFruitSruface(self):
         surface = pygame.Surface((self.fieldSize, self.fieldSize), pygame.SRCALPHA)
         cx = self.fieldSize // 2
         cy = self.fieldSize // 2
