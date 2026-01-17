@@ -47,6 +47,13 @@ class Snake:
 
         new_head_x = head_x + dir_x
         new_head_y = head_y + dir_y
+        afterHeadElement = self.segments[1]
+
+        headField = game.board[head_x][head_y]
+        if headField['type'] == game.BOARD_TELEPORT:
+            if headField['teleport_to'][0] != afterHeadElement['x'] or headField['teleport_to'][1] != afterHeadElement['y']:
+                new_head_x = headField['teleport_to'][0] # + dir_x
+                new_head_y = headField['teleport_to'][1] # + dir_y
 
         if new_head_x < 0:
             new_head_x = len(board) - 1
@@ -57,7 +64,12 @@ class Snake:
         elif new_head_y >= len(board[0]):
             new_head_y = 0
 
-        if game.board[new_head_x][new_head_y] > 0:
+        #headField = game.board[new_head_x][new_head_y]
+        #if headField['type'] == game.BOARD_TELEPORT:
+        #    new_head_x = headField['teleport_to'][0] # + dir_x
+        #    new_head_y = headField['teleport_to'][1] # + dir_y
+
+        if game.board[new_head_x][new_head_y]['moveable'] == False:
             game.onSnakeDie(self)
             self.life -= 0.1
             return
@@ -73,12 +85,13 @@ class Snake:
             game.removeFruit(new_head_x, new_head_y)
         
         self.offset = 1
-        game.board[new_head_x][new_head_y] = 1;
+        if (game.board[new_head_x][new_head_y]['type'] != game.BOARD_TELEPORT):
+            game.board[new_head_x][new_head_y]['moveable'] = False
 
         if not grow:
             lastSegment = self.segments[-1]
             self.segments = self.segments[:-1]
-            game.board[lastSegment['x']][lastSegment['y']] = 0
+            game.board[lastSegment['x']][lastSegment['y']]['moveable'] = True
 
     def die(self, game):
         self.offset = 0

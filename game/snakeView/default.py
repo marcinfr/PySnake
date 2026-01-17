@@ -22,22 +22,23 @@ class DefaultSnakeView:
         dir = snake.segments[segmentNumber]['dir']
         life = snake.life
         if life > 0:
-            nextSegment = False
+            #nextSegment = False
             prevSegment = False
             isCornerSegment = False
             if segmentNumber == 0:
                 segment = self.getHeadSegment(snake, segmentNumber) # head
-                nextSegment = snake.segments[segmentNumber + 1]
+                #nextSegment = snake.segments[segmentNumber + 1]
             elif segmentNumber == len(snake.segments) - 1:
                 prevSegment = snake.segments[segmentNumber - 1]
                 segment = self.getTailSegment(snake, segmentNumber) # tail
                 dir = prevSegment['dir']
             else:
                 prevSegment = snake.segments[segmentNumber - 1]
-                nextSegment = snake.segments[segmentNumber + 1]
-                if prevSegment['x'] == nextSegment['x']:
-                    segment = self.getStraightSegment(snake, segmentNumber)
-                elif prevSegment['y'] == nextSegment['y']:
+                #nextSegment = snake.segments[segmentNumber + 1]
+                #if prevSegment['x'] == nextSegment['x']:
+                #    segment = self.getStraightSegment(snake, segmentNumber)
+                #elif prevSegment['y'] == nextSegment['y']:
+                if dir == prevSegment['dir']:
                     segment = self.getStraightSegment(snake, segmentNumber)
                 else:
                     segment = self.getCornerSegment(snake, segmentNumber)
@@ -73,6 +74,7 @@ class DefaultSnakeView:
             else:
                 offsetX = 0
                 offsetY = 0
+
 
             if (snake.life < 1):
                 segment = pygame.transform.scale(segment, (self.fieldSize * snake.life, self.fieldSize * snake.life))

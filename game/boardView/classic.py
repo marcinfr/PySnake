@@ -39,8 +39,12 @@ class ClassicBoardView:
     def drawTopLayer(self, board):
         for x, row in enumerate(board):
             for y, value in enumerate(row):
-                if (value == 2):
-                    self.addWall(x, y)
+                if 'type' in value:
+                    type = value['type']
+                    if (type == self.game.BOARD_WALL):
+                        self.addWall(x, y)
+                    elif (type == self.game.BOARD_TELEPORT):
+                        self.drawTeleport(x, y)
 
     def addWall(self, x, y):
         if self.topLayer:
@@ -55,6 +59,14 @@ class ClassicBoardView:
         for x, inner in fruits.items():
             for y, data in inner.items():
                 self.drawFruit(data, x, y)
+
+    def drawTeleport(self, x, y):
+        pygame.draw.rect(self.topLayer, (0,0,255), (
+            x * self.fieldSize,
+            y * self.fieldSize,
+            self.fieldSize,
+            self.fieldSize,
+        ))
 
     def drawField(self, surface, x, y):
         if x % 2 == y % 2:
@@ -128,7 +140,9 @@ class ClassicBoardView:
             x1 = x + wall[0]
             y1 = y + wall[1]
             if 0 <= x1 < len(self.game.board) and 0 <= y1 < len(self.game.board[0]):
-                if self.game.board[x1][y1] == 0:
+                if self.game.board[x1][y1]['moveable'] == True \
+                    and self.game.board[x1][y1]['type'] == None \
+                    and not self.game.board[x1][y1]['has_fruit']:
                     self.screen.blit(
                         surface, 
                         (self.fieldSize * x1, self.fieldSize * y1)

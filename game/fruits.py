@@ -45,7 +45,9 @@ class Fruits:
                 x1 = x + wall[0]
                 y1 = y + wall[1]
                 if 0 <= x1 < len(game.board) and 0 <= y1 < len(game.board[0]):
-                    if game.board[x1][y1] == 0:
+                    if game.board[x1][y1]['moveable'] == True \
+                        and game.board[x1][y1]['type'] == None \
+                        and not game.board[x1][y1]['has_fruit']:
                         game.addWall(x1, y1)
         if type == Fruits.FRUIT_TYPE_NORMAL:
             if random.randint(0, 2) == 0:
@@ -66,7 +68,6 @@ class Fruits:
         
         if type == Fruits.FRUIT_TYPE_NORMAL:
             points = 1
-            sound = pygame.mixer.Sound("assets/pick1.wav")
             notification = font.render("+" + str(points), True, (255, 255, 255))
 
         if type == Fruits.FRUIT_TYPE_FROZEN:
@@ -93,5 +94,7 @@ class Fruits:
 
         snake.totalPoints += points
 
-        if sound:
-            sound.play()
+        if not sound:
+            sound = pygame.mixer.Sound("assets/pick1.wav")
+            
+        sound.play()

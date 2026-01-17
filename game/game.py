@@ -12,6 +12,20 @@ from game.fruits import Fruits
 
 class Game:
 
+    BOARD_WALL = 1
+    BOARD_TELEPORT = 2
+
+    WALL_FIELD_DATA = {
+        'type': BOARD_WALL,
+        'has_fruit': False,
+        'moveable': False
+    }
+    EMPTY_FIELD_DATA = {
+        'type': None,
+        'has_fruit': False,
+        'moveable': True
+    }
+
     def __init__(self, screen):
         self.screen = screen
         self.isRunning = False
@@ -54,7 +68,7 @@ class Game:
     def getBoard(self, map):
         width = map['mapSize'][0]
         height = map['mapSize'][1]
-        board = [[0 for _ in range(height)] for _ in range(width)]
+        board = [[self.EMPTY_FIELD_DATA.copy() for _ in range(height)] for _ in range(width)]
         walls = self.map['walls']
         for wall in walls:
             x1 = wall[0][0]
@@ -67,7 +81,7 @@ class Game:
             sy = 1 if y1 < y2 else -1
             err = dx - dy
             while True:
-                board[x1][y1] = 2
+                board[x1][y1] = self.WALL_FIELD_DATA.copy()
                 if x1 == x2 and y1 == y2:
                     break
                 e2 = 2 * err
@@ -77,6 +91,23 @@ class Game:
                 if e2 < dx:
                     err += dx
                     y1 += sy
+        for teleport in map.get('teleports', []):
+            x = teleport[0][0]
+            y = teleport[0][1]
+            x1 = teleport[1][0]
+            y1 = teleport[1][1]
+            board[x][y] = {
+                'type': self.BOARD_TELEPORT,
+                'has_fruit': False,
+                'moveable': True,
+                'teleport_to': (x1, y1),
+            }
+            board[x1][y1] = {
+                'type': self.BOARD_TELEPORT,
+                'has_fruit': False,
+                'moveable': True,
+                'teleport_to': (x, y),
+            }
         return board
 
     
@@ -291,27 +322,23 @@ class Game:
     def addRandomFruit(self, type = Fruits.FRUIT_TYPE_NORMAL, data = {}):
         x = random.randrange(0, len(self.board))
         y = random.randrange(0, len(self.board[0]))
-        if self.board[x][y] == 0:
+        if self.board[x][y]['type'] == None and not self.board[x][y]['has_fruit']:
             self.addFruit(x, y, type, data)
         else:
             self.addRandomFruit(type, data)
 
     def addFruit(self, x, y, type = Fruits.FRUIT_TYPE_NORMAL, data = {}):
         self.fruits[x][y] = Fruits.getFruitData(type, data)
-        self.board[x][y] = -1
+        self.board[x][y]['has_fruit'] = True
 
     def removeFruit(self, x, y):
         self.fruitsToRmove.append((x, y))
-        #type = self.fruits[x][y]
-        #if type == Fruits.FRUIT_TYPE_NORMAL:
-        #    self.addRandomFruit()
-        self.board[x][y] = 0
 
     def processRemovedFruits(self):
         for x, y in self.fruitsToRmove:
+            self.board[x][y]['has_fruit'] = False
             Fruits.onRemove(self, x, y, self.fruits[x][y])
             del self.fruits[x][y]
-            self.board[x][y] = 0
         self.fruitsToRmove = []
         
     def onSnakeDie(self, snake):
@@ -325,5 +352,5 @@ class Game:
         Fruits.onPick(self, snake, fruitType)
 
     def addWall(self, x, y):
-        self.board[x][y] = 1
+        self.board[x][y] = self.WALL_FIELD_DATA.copy()
         self.boardView.addWall(x, y)
