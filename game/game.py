@@ -142,7 +142,7 @@ class Game:
         self.boardView = self.theme['boardView']
         self.boardView.init(self)
         self.snakeView = self.theme['snakeView']
-        self.snakeView.init(self.gameSurface, self.fieldSize)
+        self.snakeView.init(self)
         self.boardNotification = Notifications(self.gameSurface)
         self.darkness = 0
         self.darknessFactor = 0

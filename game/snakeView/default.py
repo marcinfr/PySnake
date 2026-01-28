@@ -6,15 +6,15 @@ class DefaultSnakeView:
 
     offsetRate = 1
 
-    def init(self, screen, fieldSize):
-        self.screen = screen
-        self.fieldSize = fieldSize
+    def init(self, game):
+        self.game = game
+        self.screen = game.gameSurface
+        self.fieldSize = game.fieldSize
         self.cachedSegemnts = {}
 
     def display(self, snake):
         for segmentNumber in range(len(snake.segments)):
             self.drawSegment(self.screen, snake, segmentNumber)
-        self.drawSegment(self.screen, snake, 0)
 
     def drawSegment(self, surface, snake, segmentNumber):
         x = snake.segments[segmentNumber]['x']
@@ -38,7 +38,7 @@ class DefaultSnakeView:
                 #if prevSegment['x'] == nextSegment['x']:
                 #    segment = self.getStraightSegment(snake, segmentNumber)
                 #elif prevSegment['y'] == nextSegment['y']:
-                if dir == prevSegment['dir']:
+                if dir == prevSegment['dir'] or self.game.board[x][y]['type'] == self.game.BOARD_TELEPORT:
                     segment = self.getStraightSegment(snake, segmentNumber)
                 else:
                     segment = self.getCornerSegment(snake, segmentNumber)
@@ -75,9 +75,14 @@ class DefaultSnakeView:
                 offsetX = 0
                 offsetY = 0
 
-
             if (snake.life < 1):
                 segment = pygame.transform.scale(segment, (self.fieldSize * snake.life, self.fieldSize * snake.life))
+
+            if self.game.board[x][y]['type'] == self.game.BOARD_TELEPORT:
+                if not prevSegment or self.game.board[prevSegment['x']][prevSegment['y']]['type'] == self.game.BOARD_TELEPORT:
+                    segment = self.addTeleportMask(segment, dir)
+                else:
+                    segment = self.addTeleportMask(segment, (dir[0] * -1, dir[1] * -1))
 
             px = x * self.fieldSize + self.fieldSize // 2 - offsetX
             py = y * self.fieldSize + self.fieldSize // 2 - offsetY
@@ -87,6 +92,46 @@ class DefaultSnakeView:
                 segment, 
                 rect
             )
+
+    def addTeleportMask(self, segment, dir):
+        mask = pygame.Surface((self.fieldSize, self.fieldSize), pygame.SRCALPHA)
+        mask.fill((0,0,0,0))
+
+        #for i in range(10):
+        #    size = self.fieldSize * 2 - self.fieldSize * (i / 10)
+        #    pygame.draw.ellipse(
+        #        mask,
+        #        (255, 255, 255, min(i * 30, 255)),
+        #        (- self.fieldSize // 2 , 0, size, self.fieldSize),
+        #    )
+
+        for i in range(10):
+            pygame.draw.rect(
+                mask,
+                (255, 255, 255, min(i * 50, 255)),
+                (
+                    0,
+                    0,
+                    self.fieldSize * 2 // (i + 1),
+                    self.fieldSize
+                ),
+            )
+
+        surface = pygame.Surface((self.fieldSize, self.fieldSize), pygame.SRCALPHA)
+        surface.blit(segment, (0,0))
+        
+        if (dir[0] < 0):
+            mask = pygame.transform.rotate(mask, 180)
+        elif (dir[1] < 0):
+            mask = pygame.transform.rotate(mask, 90)
+        elif (dir[1] > 0):
+            mask = pygame.transform.rotate(mask, 270)
+
+        surface.blit(mask, (
+            0,
+            0,
+        ), special_flags=pygame.BLEND_RGBA_MULT)
+        return surface
 
     def getHeadSegment(self, snake, segmentNumber):
         return self.getStraightSegment(snake, segmentNumber)
@@ -98,7 +143,7 @@ class DefaultSnakeView:
         cacheId = 'straight-' + str(snake.id)
         if cacheId not in self.cachedSegemnts:
             fieldSize = math.ceil(self.fieldSize)
-            surface = pygame.Surface((fieldSize, fieldSize))
+            surface = pygame.Surface((fieldSize, fieldSize), pygame.SRCALPHA)
 
             pygame.draw.rect(surface, self.getSnakeColor(snake, 0.8), (
                 0,

@@ -54,6 +54,9 @@ class Snake:
             if headField['teleport_to'][0] != afterHeadElement['x'] or headField['teleport_to'][1] != afterHeadElement['y']:
                 new_head_x = headField['teleport_to'][0] # + dir_x
                 new_head_y = headField['teleport_to'][1] # + dir_y
+                #while game.board[new_head_x + dir_x][new_head_y + dir_y]['type'] == game.BOARD_TELEPORT:
+                #    new_head_x += dir_x
+                #    new_head_y += dir_y
 
         if new_head_x < 0:
             new_head_x = len(board) - 1
@@ -102,7 +105,7 @@ class Snake:
             self.life = 0
         if self.life <= 0.6:
             for segment in self.segments:
-                game.board[segment['x']][segment['y']] = 0
+                game.board[segment['x']][segment['y']]['moveable'] = True
 
     def moveUp(self):
         if self.direction[1] != 1:
