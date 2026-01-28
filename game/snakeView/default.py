@@ -14,7 +14,9 @@ class DefaultSnakeView:
 
     def display(self, snake):
         for segmentNumber in range(len(snake.segments)):
-            self.drawSegment(self.screen, snake, segmentNumber)
+            if segmentNumber != 0:
+                self.drawSegment(self.screen, snake, segmentNumber)
+        self.drawSegment(self.screen, snake, 0)
 
     def drawSegment(self, surface, snake, segmentNumber):
         x = snake.segments[segmentNumber]['x']
@@ -116,13 +118,17 @@ class DefaultSnakeView:
                 (
                     0,
                     0,
-                    self.fieldSize * 2 // (i + 1),
+                    self.fieldSize // (i + 1),
                     self.fieldSize
                 ),
             )
 
         surface = pygame.Surface((self.fieldSize, self.fieldSize), pygame.SRCALPHA)
-        surface.blit(segment, (0,0))
+
+        rect1 = surface.get_rect()
+        rect2 = segment.get_rect()
+        rect2.center = rect1.center
+        surface.blit(segment, rect2)
         
         if (dir[0] < 0):
             mask = pygame.transform.rotate(mask, 180)

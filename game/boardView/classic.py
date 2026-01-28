@@ -61,7 +61,7 @@ class ClassicBoardView:
                 self.drawFruit(data, x, y)
 
     def drawTeleport(self, x, y):
-        pygame.draw.rect(self.topLayer, (0,0,0), (
+        pygame.draw.rect(self.topLayer, (100,100,100), (
             x * self.fieldSize,
             y * self.fieldSize,
             self.fieldSize,
