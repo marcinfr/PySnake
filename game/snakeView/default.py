@@ -22,19 +22,19 @@ class DefaultSnakeView:
         dir = snake.segments[segmentNumber]['dir']
         life = snake.life
         if life > 0:
-            #nextSegment = False
+            nextSegment = False
             prevSegment = False
             isCornerSegment = False
             if segmentNumber == 0:
                 segment = self.getHeadSegment(snake, segmentNumber) # head
-                #nextSegment = snake.segments[segmentNumber + 1]
+                nextSegment = snake.segments[segmentNumber + 1]
             elif segmentNumber == len(snake.segments) - 1:
                 prevSegment = snake.segments[segmentNumber - 1]
                 segment = self.getTailSegment(snake, segmentNumber) # tail
                 dir = prevSegment['dir']
             else:
                 prevSegment = snake.segments[segmentNumber - 1]
-                #nextSegment = snake.segments[segmentNumber + 1]
+                nextSegment = snake.segments[segmentNumber + 1]
                 #if prevSegment['x'] == nextSegment['x']:
                 #    segment = self.getStraightSegment(snake, segmentNumber)
                 #elif prevSegment['y'] == nextSegment['y']:
@@ -79,10 +79,14 @@ class DefaultSnakeView:
                 segment = pygame.transform.scale(segment, (self.fieldSize * snake.life, self.fieldSize * snake.life))
 
             if self.game.board[x][y]['type'] == self.game.BOARD_TELEPORT:
-                if not prevSegment or self.game.board[prevSegment['x']][prevSegment['y']]['type'] == self.game.BOARD_TELEPORT:
-                    segment = self.addTeleportMask(segment, dir)
-                else:
+                if nextSegment and self.game.board[nextSegment['x']][nextSegment['y']]['type'] == self.game.BOARD_TELEPORT:
                     segment = self.addTeleportMask(segment, (dir[0] * -1, dir[1] * -1))
+                elif not nextSegment and self.game.board[prevSegment['x']][prevSegment['y']]['type'] != self.game.BOARD_TELEPORT:
+                    segment = self.addTeleportMask(segment, (dir[0] * -1, dir[1] * -1))
+                else:
+                    segment = self.addTeleportMask(segment, dir)
+                #else:
+                #    segment = self.addTeleportMask(segment, (dir[0] * -1, dir[1] * -1))
 
             px = x * self.fieldSize + self.fieldSize // 2 - offsetX
             py = y * self.fieldSize + self.fieldSize // 2 - offsetY

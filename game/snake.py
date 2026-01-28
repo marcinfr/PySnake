@@ -50,13 +50,16 @@ class Snake:
         afterHeadElement = self.segments[1]
 
         headField = game.board[head_x][head_y]
+        
         if headField['type'] == game.BOARD_TELEPORT:
             if headField['teleport_to'][0] != afterHeadElement['x'] or headField['teleport_to'][1] != afterHeadElement['y']:
+                pass
+            if game.board[afterHeadElement['x']][afterHeadElement['y']]['type'] != game.BOARD_TELEPORT:
                 new_head_x = headField['teleport_to'][0] # + dir_x
                 new_head_y = headField['teleport_to'][1] # + dir_y
-                #while game.board[new_head_x + dir_x][new_head_y + dir_y]['type'] == game.BOARD_TELEPORT:
-                #    new_head_x += dir_x
-                #    new_head_y += dir_y
+                while game.board[new_head_x + dir_x][new_head_y + dir_y]['type'] == game.BOARD_TELEPORT:
+                    new_head_x += dir_x
+                    new_head_y += dir_y
 
         if new_head_x < 0:
             new_head_x = len(board) - 1
